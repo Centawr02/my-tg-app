@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Мини-приложение</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root {
+    --bg: var(--tg-theme-bg-color, #0f1115);
+    --text: var(--tg-theme-text-color, #f4f1ea);
+    --hint: var(--tg-theme-hint-color, #8a8d93);
+    --accent: var(--tg-theme-button-color, #ff7a59);
+    --accent-text: var(--tg-theme-button-text-color, #0f1115);
+    --card: rgba(255,255,255,0.05);
+    --card-border: rgba(255,255,255,0.08);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding: 20px 18px 100px;
+  }
+
+  .eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  h1 {
+    font-size: 26px;
+    line-height: 1.2;
+    margin: 0 0 4px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+
+  .sub {
+    color: var(--hint);
+    font-size: 14px;
+    margin: 0 0 24px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+
+  .profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--accent), #ffb199);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--accent-text);
+    flex-shrink: 0;
+  }
+
+  .profile-name {
+    font-weight: 700;
+    font-size: 16px;
+  }
+
+  .profile-meta {
+    font-size: 13px;
+    color: var(--hint);
+  }
+
+  .counter-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .counter-num {
+    font-size: 40px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+
+  .counter-label {
+    color: var(--hint);
+    font-size: 13px;
+    margin-top: 2px;
+  }
+
+  .btn {
+    border: none;
+    border-radius: 14px;
+    padding: 14px 18px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.06s ease, opacity 0.15s ease;
+  }
+
+  .btn:active { transform: scale(0.96); }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--accent-text);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--card-border);
+    color: var(--text);
+  }
+
+  .grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .mood-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .mood {
+    flex: 1;
+    text-align: center;
+    font-size: 26px;
+    padding: 10px 0;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.04);
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.06s ease;
+  }
+
+  .mood.selected {
+    background: var(--accent);
+    transform: scale(1.05);
+  }
+
+  .section-title {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--hint);
+    font-weight: 700;
+    margin: 22px 0 10px;
+  }
+
+  .log-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--card-border);
+    font-size: 14px;
+  }
+
+  .log-item:last-child { border-bottom: none; }
+
+  .log-time { color: var(--hint); font-size: 12px; }
+
+  .empty {
+    color: var(--hint);
+    font-size: 13px;
+    text-align: center;
+    padding: 14px 0;
+  }
+</style>
+</head>
+<body>
+
+  <div class="eyebrow">Мини-приложение · Telegram</div>
+  <h1>Привет 👋</h1>
+  <p class="sub" id="subText">Это демо-приложение, открытое внутри Telegram.</p>
+
+  <div class="card profile">
+    <div class="avatar" id="avatarLetter">?</div>
+    <div>
+      <div class="profile-name" id="userName">Гость</div>
+      <div class="profile-meta" id="userMeta">Данные пользователя появятся при открытии из Telegram</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="counter-row">
+      <div>
+        <div class="counter-num" id="counterVal">0</div>
+        <div class="counter-label">Кликов сделано</div>
+      </div>
+      <button class="btn btn-primary" id="incBtn">+1 ➕</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="counter-label" style="margin-bottom:2px;">Как настроение?</div>
+    <div class="mood-row" id="moodRow">
+      <div class="mood" data-mood="😞">😞</div>
+      <div class="mood" data-mood="😐">😐</div>
+      <div class="mood" data-mood="🙂">🙂</div>
+      <div class="mood" data-mood="😄">😄</div>
+      <div class="mood" data-mood="🤩">🤩</div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <button class="btn btn-ghost" id="hapticBtn">📳 Вибро-отклик</button>
+    <button class="btn btn-ghost" id="themeBtn">🎨 Цвет темы</button>
+  </div>
+
+  <div class="section-title">Журнал действий</div>
+  <div class="card" id="logCard">
+    <div class="empty" id="logEmpty">Пока пусто — понажимай кнопки выше</div>
+  </div>
+
+  <script>
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+      tg.ready();
+      tg.expand();
+    }
+
+    // --- профиль пользователя ---
+    const user = tg?.initDataUnsafe?.user;
+    if (user) {
+      const fullName = [user.first_name, user.last_name].filter(Boolean).join(" ");
+      document.getElementById("userName").textContent = fullName || "Без имени";
+      document.getElementById("userMeta").textContent = user.username ? "@" + user.username : "ID: " + user.id;
+      document.getElementById("avatarLetter").textContent = (user.first_name || "?")[0].toUpperCase();
+      document.getElementById("subText").textContent = "Рады видеть тебя, " + (user.first_name || "друг") + "!";
+    } else {
+      document.getElementById("subText").textContent =
+        "Открой это приложение через кнопку у бота в Telegram, чтобы увидеть свои данные.";
+    }
+
+    // --- журнал ---
+    const logCard = document.getElementById("logCard");
+    const logEmpty = document.getElementById("logEmpty");
+    function addLog(text) {
+      if (logEmpty.parentElement) logEmpty.remove();
+      const item = document.createElement("div");
+      item.className = "log-item";
+      const now = new Date();
+      const time = now.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+      item.innerHTML = `<span>${text}</span><span class="log-time">${time}</span>`;
+      logCard.prepend(item);
+    }
+
+    // --- счётчик ---
+    let count = 0;
+    const counterVal = document.getElementById("counterVal");
+    document.getElementById("incBtn").addEventListener("click", () => {
+      count++;
+      counterVal.textContent = count;
+      addLog("Клик #" + count);
+      tg?.HapticFeedback?.impactOccurred("light");
+    });
+
+    // --- настроение ---
+    document.querySelectorAll(".mood").forEach(el => {
+      el.addEventListener("click", () => {
+        document.querySelectorAll(".mood").forEach(m => m.classList.remove("selected"));
+        el.classList.add("selected");
+        addLog("Настроение: " + el.dataset.mood);
+        tg?.HapticFeedback?.impactOccurred("medium");
+      });
+    });
+
+    // --- вибро кнопка ---
+    document.getElementById("hapticBtn").addEventListener("click", () => {
+      tg?.HapticFeedback?.notificationOccurred("success");
+      addLog("Вибро-отклик отправлен");
+      if (!tg) alert("Это работает только внутри Telegram");
+    });
+
+    // --- тема ---
+    document.getElementById("themeBtn").addEventListener("click", () => {
+      const scheme = tg?.colorScheme || "неизвестно";
+      addLog("Текущая тема Telegram: " + scheme);
+      tg?.showAlert ? tg.showAlert("Тема оформления: " + scheme) : alert("Тема: " + scheme);
+    });
+
+    // --- главная кнопка Telegram ---
+    if (tg) {
+      tg.MainButton.setText("Закрыть приложение");
+      tg.MainButton.show();
+      tg.MainButton.onClick(() => tg.close());
+    }
+  </script>
+</body>
+</html>
