@@ -1,1536 +1,1464 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
-<title>MONXTRIX</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&family=Orbitron:wght@600;700;800;900&display=swap" rel="stylesheet">
-<style>
-  /* ─── RESET & ROOTS ─── */
-  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
-  html,body{height:100%;overflow:hidden;background:#08061a;color:#e8e0f0;font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased}
-  .display{font-family:'Orbitron',monospace;letter-spacing:1px}
-
-  /* ─── COLOR PALETTE ─── */
-  :root{
-    --bg-deep:#08061a;
-    --bg-surface:#100b28;
-    --bg-card:#1a1240;
-    --bg-card-hover:#241a50;
-    --border-subtle:rgba(255,255,255,.06);
-    --border-card:rgba(255,255,255,.08);
-    --border-glow:rgba(120,80,255,.25);
-    --text-primary:#f0eaff;
-    --text-secondary:rgba(240,234,255,.55);
-    --text-tertiary:rgba(240,234,255,.35);
-    --accent-purple:#7c5cfc;
-    --accent-purple-glow:#7c5cfc40;
-    --accent-cyan:#00e5ff;
-    --accent-cyan-glow:#00e5ff30;
-    --accent-green:#39ff7a;
-    --accent-green-glow:#39ff7a30;
-    --accent-orange:#ff8a3c;
-    --accent-orange-glow:#ff8a3c30;
-    --accent-pink:#ff3cac;
-    --accent-pink-glow:#ff3cac30;
-    --accent-gold:#ffd63c;
-    --accent-gold-glow:#ffd63c30;
-    --gradient-card:linear-gradient(165deg,#1a1240,#120c30);
-    --gradient-accent:linear-gradient(135deg,#7c5cfc,#00e5ff);
-    --gradient-danger:linear-gradient(135deg,#ff3cac,#ff8a3c);
-    --gradient-success:linear-gradient(135deg,#39ff7a,#00e5ff);
-    --radius-sm:10px;
-    --radius-md:16px;
-    --radius-lg:22px;
-    --radius-xl:28px;
-    --shadow-card:0 8px 32px rgba(0,0,0,.4),0 0 0 1px var(--border-card);
-    --shadow-glow:0 8px 32px rgba(124,92,252,.15);
-    --blur-bg:blur(60px);
-  }
-
-  /* ─── UTILITIES ─── */
-  .flex{display:flex}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-between{justify-content:space-between}.gap-2{gap:2px}.gap-4{gap:4px}.gap-6{gap:6px}.gap-8{gap:8px}.gap-10{gap:10px}.gap-12{gap:12px}.gap-14{gap:14px}.gap-16{gap:16px}.flex-1{flex:1}.shrink-0{flex-shrink:0}.text-center{text-align:center}.w-full{width:100%}
-  .text-xs{font-size:11px;line-height:1.3}.text-sm{font-size:13px;line-height:1.35}.text-base{font-size:15px;line-height:1.4}.text-lg{font-size:18px;line-height:1.3}.text-xl{font-size:22px;line-height:1.2}
-  .text-secondary{color:var(--text-secondary)}.text-tertiary{color:var(--text-tertiary)}
-  .font-bold{font-weight:700}.font-extrabold{font-weight:800}.font-black{font-weight:900}
-
-  /* ─── ANIMATED BG (PARTICLES + AURORA) ─── */
-  #bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
-  .bg-overlay{
-    position:fixed;inset:0;z-index:0;pointer-events:none;
-    background:
-      radial-gradient(ellipse 80% 50% at 15% 20%, rgba(124,92,252,.12), transparent),
-      radial-gradient(ellipse 60% 40% at 85% 75%, rgba(0,229,255,.08), transparent),
-      radial-gradient(ellipse 50% 40% at 50% 90%, rgba(57,255,122,.06), transparent),
-      var(--bg-deep);
-  }
-
-  /* ─── LOOPING MONSTER BACKGROUND ─── */
-  .monster-bg{
-    position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
-    opacity:.07;
-  }
-  .monster-bg span{
-    position:absolute;font-size:clamp(60px,15vw,140px);
-    animation:monsterDrift linear infinite;
-    pointer-events:none;
-  }
-  @keyframes monsterDrift{
-    0%{transform:translateY(110vh) rotate(0deg) scale(.6);opacity:0}
-    10%{opacity:1}
-    90%{opacity:1}
-    100%{transform:translateY(-20vh) rotate(360deg) scale(1.2);opacity:0}
-  }
-
-  /* ─── APP SHELL ─── */
-  #app{
-    position:fixed;inset:0;z-index:1;
-    display:flex;flex-direction:column;
-    overflow:hidden;
-  }
-
-  /* ─── SCREENS ─── */
-  .screen{
-    position:absolute;inset:0;
-    display:flex;flex-direction:column;
-    padding:16px 16px calc(16px + env(safe-area-inset-bottom));
-    opacity:0;pointer-events:none;
-    transform:translateY(8px) scale(.99);
-    transition:opacity .3s ease,transform .3s ease;
-    overflow:hidden;
-  }
-  .screen.active{opacity:1;pointer-events:auto;transform:translateY(0) scale(1);z-index:2}
-
-  /* ─── TOP BAR ─── */
-  .topbar{
-    display:flex;align-items:center;gap:8px;flex-shrink:0;
-    padding:8px 4px 12px;
-  }
-  .topbar-left{display:flex;align-items:center;gap:8px;flex:1}
-  .stat-chip{
-    display:flex;align-items:center;gap:5px;
-    background:var(--bg-card);border:1px solid var(--border-card);
-    border-radius:30px;padding:5px 12px 5px 8px;
-    font-weight:700;font-size:13px;color:var(--text-primary);
-    backdrop-filter:var(--blur-bg);
-  }
-  .stat-chip .chip-icon{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px}
-  .chip-gold{background:var(--accent-gold-glow);color:var(--accent-gold)}
-  .chip-trophy{background:var(--accent-purple-glow);color:var(--accent-purple)}
-  .chip-ruble{background:var(--accent-green-glow);color:var(--accent-green)}
-  .topbar-right{display:flex;align-items:center;gap:6px}
-  .btn-icon{
-    width:36px;height:36px;border-radius:50%;border:1px solid var(--border-card);
-    background:var(--bg-card);color:var(--text-secondary);font-size:16px;
-    display:flex;align-items:center;justify-content:center;cursor:pointer;
-    transition:all .15s ease;backdrop-filter:var(--blur-bg);
-  }
-  .btn-icon:active{transform:scale(.9);background:var(--bg-card-hover)}
-  .btn-icon .badge-dot{
-    position:absolute;top:6px;right:6px;width:8px;height:8px;
-    border-radius:50%;background:var(--accent-pink);
-  }
-
-  /* ─── BACK ROW ─── */
-  .back-row{
-    display:flex;align-items:center;gap:10px;flex-shrink:0;
-    padding:4px 0 12px;
-  }
-  .btn-back{
-    border:none;background:var(--bg-card);border:1px solid var(--border-card);
-    color:var(--text-secondary);border-radius:var(--radius-md);
-    padding:8px 14px;font-weight:600;font-size:13px;cursor:pointer;
-    backdrop-filter:var(--blur-bg);transition:all .15s ease;
-  }
-  .btn-back:active{transform:scale(.94);background:var(--bg-card-hover)}
-  .screen-title{font-size:18px;font-weight:800;color:var(--text-primary)}
-
-  /* ─── SPLASH ─── */
-  #splash{align-items:center;justify-content:center;text-align:center}
-  .splash-badge{
-    width:clamp(100px,30vw,180px);height:clamp(100px,30vw,180px);
-    border-radius:var(--radius-xl);background:var(--gradient-card);
-    border:2px solid var(--border-glow);
-    display:flex;align-items:center;justify-content:center;
-    font-size:clamp(36px,10vw,64px);margin-bottom:16px;
-    box-shadow:0 0 60px var(--accent-purple-glow);
-    animation:splashPulse 2.5s ease-in-out infinite;
-    position:relative;overflow:hidden;
-  }
-  @keyframes splashPulse{0%,100%{box-shadow:0 0 40px var(--accent-purple-glow)}50%{box-shadow:0 0 80px var(--accent-purple-glow),0 0 120px var(--accent-cyan-glow)}}
-  .splash-title{font-family:'Orbitron',monospace;font-size:clamp(28px,8vw,48px);font-weight:900;background:var(--gradient-accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:3px}
-  .splash-sub{font-size:12px;color:var(--text-tertiary);letter-spacing:4px;margin-top:4px;text-transform:uppercase}
-  .loadbar-track{width:clamp(200px,60vw,320px);height:6px;border-radius:3px;background:var(--bg-card);margin-top:28px;overflow:hidden}
-  .loadbar-fill{height:100%;width:0%;background:var(--gradient-accent);border-radius:3px;transition:width .15s linear}
-  .splash-hint{font-size:12px;color:var(--text-tertiary);margin-top:16px;animation:fadePulse 1.8s ease-in-out infinite}
-  @keyframes fadePulse{0%,100%{opacity:.3}50%{opacity:.7}}
-
-  /* ─── MENU ─── */
-  .menu-hero{text-align:center;margin:4px 0 16px;flex-shrink:0}
-  .menu-hero .menu-logo{font-family:'Orbitron',monospace;font-size:24px;font-weight:800;background:var(--gradient-accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:2px}
-  .menu-hero .menu-tag{font-size:12px;color:var(--text-tertiary);margin-top:4px}
-  .menu-grid{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:12px;overflow-y:auto;padding:0 0 8px;align-content:start}
-
-  .menu-card{position:relative;border-radius:var(--radius-lg);padding:20px 16px 16px;background:var(--gradient-card);border:1px solid var(--border-card);cursor:pointer;overflow:hidden;transition:all .18s ease}
-  .menu-card:active{transform:scale(.96)}
-  .menu-card .mc-bg-icon{position:absolute;right:-8px;bottom:-8px;font-size:72px;opacity:.06;pointer-events:none;transform:rotate(-8deg)}
-  .menu-card .mc-icon-wrap{
-    width:44px;height:44px;border-radius:var(--radius-md);
-    display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:10px;
-  }
-  .menu-card .mc-title{font-weight:800;font-size:15px;color:var(--text-primary)}
-  .menu-card .mc-desc{font-size:12px;color:var(--text-tertiary);line-height:1.35;margin-top:2px}
-  .mc-badge{
-    position:absolute;top:10px;right:10px;
-    font-size:9px;font-weight:800;padding:3px 8px;border-radius:8px;
-    text-transform:uppercase;letter-spacing:.5px;
-  }
-
-  .mc-accent-purple .mc-icon-wrap{background:var(--accent-purple-glow);color:var(--accent-purple)}
-  .mc-accent-purple{border-color:var(--border-glow)}
-  .mc-accent-purple .mc-badge{background:var(--accent-purple-glow);color:var(--accent-purple)}
-  .mc-accent-cyan .mc-icon-wrap{background:var(--accent-cyan-glow);color:var(--accent-cyan)}
-  .mc-accent-cyan .mc-badge{background:var(--accent-cyan-glow);color:var(--accent-cyan)}
-  .mc-accent-orange .mc-icon-wrap{background:var(--accent-orange-glow);color:var(--accent-orange)}
-  .mc-accent-orange .mc-badge{background:var(--accent-orange-glow);color:var(--accent-orange)}
-  .mc-accent-green .mc-icon-wrap{background:var(--accent-green-glow);color:var(--accent-green)}
-  .mc-accent-green .mc-badge{background:var(--accent-green-glow);color:var(--accent-green)}
-  .mc-accent-pink .mc-icon-wrap{background:var(--accent-pink-glow);color:var(--accent-pink)}
-  .mc-accent-pink .mc-badge{background:var(--accent-pink-glow);color:var(--accent-pink)}
-
-  /* ─── BUTTONS ─── */
-  .btn-primary{
-    border:none;border-radius:var(--radius-md);padding:14px 28px;
-    font-weight:700;font-size:14px;cursor:pointer;color:#fff;
-    background:var(--gradient-accent);transition:all .15s ease;
-    box-shadow:0 4px 20px var(--accent-purple-glow);
-  }
-  .btn-primary:active{transform:scale(.96)}
-  .btn-primary:disabled{opacity:.3;pointer-events:none;box-shadow:none}
-  .btn-secondary{
-    border:1px solid var(--border-card);border-radius:var(--radius-md);padding:12px 22px;
-    font-weight:600;font-size:13px;cursor:pointer;color:var(--text-secondary);
-    background:var(--bg-card);transition:all .15s ease;backdrop-filter:var(--blur-bg);
-  }
-  .btn-secondary:active{transform:scale(.96);background:var(--bg-card-hover)}
-  .btn-danger{
-    background:var(--gradient-danger);color:#fff;border:none;border-radius:var(--radius-md);
-    padding:14px 28px;font-weight:700;font-size:14px;cursor:pointer;
-    box-shadow:0 4px 20px var(--accent-pink-glow);transition:all .15s ease;
-  }
-  .btn-danger:active{transform:scale(.96)}
-
-  /* ─── TOAST ─── */
-  .toast{
-    position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));left:50%;
-    transform:translateX(-50%) translateY(20px);z-index:100;
-    background:var(--bg-card);border:1px solid var(--border-card);
-    backdrop-filter:var(--blur-bg);
-    border-radius:var(--radius-md);padding:12px 20px;
-    font-size:13px;font-weight:600;color:var(--text-primary);
-    opacity:0;pointer-events:none;transition:all .25s ease;white-space:nowrap;
-  }
-  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-  /* ─── SCROLLBAR ─── */
-  ::-webkit-scrollbar{width:3px}
-  ::-webkit-scrollbar-track{background:transparent}
-  ::-webkit-scrollbar-thumb{background:var(--border-card);border-radius:2px}
-</style>
+    <meta charset="UTF-8">
+    <title>Clash of Clones – одиночная стратегия</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- PixiJS (v7) – лёгкий 2D‑рендерер -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.3.2/pixi.min.js"
+            integrity="sha512-+K1JzVkGkX6f5ZgU1c9V6K+8XkJc3K5R6vGxk6VYlK6eQ5JxgZcV5J8yV6cG5X9Jc2VJkK6V9vY6e3U7g=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="bg-overlay"></div>
-<canvas id="bg-canvas"></canvas>
-<div class="monster-bg" id="monsterBg"></div>
+    <div id="game-container"></div>
 
-<div id="app">
-
-  <!-- ═══ SPLASH ═══ -->
-  <div class="screen active" id="splash">
-    <div class="splash-badge">⚡</div>
-    <div class="splash-title">MONXTRIX</div>
-    <div class="splash-sub display">Monster Battles</div>
-    <div class="loadbar-track"><div class="loadbar-fill" id="loadFill"></div></div>
-    <div class="splash-hint" id="splashHint">initializing...</div>
-  </div>
-
-  <!-- ═══ MENU ═══ -->
-  <div class="screen" id="menu">
-    <div class="topbar">
-      <div class="topbar-left">
-        <div class="stat-chip"><div class="chip-icon chip-gold">🪙</div><span id="coinsTop">0</span></div>
-        <div class="stat-chip"><div class="chip-icon chip-trophy">🏆</div><span id="winsTop">0</span></div>
-        <div class="stat-chip"><div class="chip-icon chip-ruble">₽</div><span id="rublesTop">0</span></div>
-      </div>
-      <div class="topbar-right">
-        <button class="btn-icon" data-go="battlepass" style="position:relative" id="bpIconBtn">🎫<div class="badge-dot"></div></button>
-      </div>
-    </div>
-    <div class="menu-hero">
-      <div class="menu-logo">MONXTRIX</div>
-      <div class="menu-tag">выбери режим</div>
-    </div>
-    <div class="menu-grid">
-      <div class="menu-card mc-accent-pink" data-go="arena">
-        <div class="mc-badge">PvE</div>
-        <div class="mc-bg-icon">⚔️</div>
-        <div class="mc-icon-wrap">⚔️</div>
-        <div class="mc-title">Арена</div>
-        <div class="mc-desc">Сражайся с дикими монстрами и зарабатывай монеты</div>
-      </div>
-      <div class="menu-card mc-accent-cyan" data-go="collection">
-        <div class="mc-bg-icon">📒</div>
-        <div class="mc-icon-wrap">📒</div>
-        <div class="mc-title">Коллекция</div>
-        <div class="mc-desc">Все твои монстры и их прокачка</div>
-      </div>
-      <div class="menu-card mc-accent-orange" data-go="shop">
-        <div class="mc-bg-icon">🛒</div>
-        <div class="mc-icon-wrap">🛒</div>
-        <div class="mc-title">Лавка</div>
-        <div class="mc-desc">Открывай новых монстров за монеты</div>
-      </div>
-      <div class="menu-card mc-accent-green" data-go="lab">
-        <div class="mc-bg-icon">🧬</div>
-        <div class="mc-icon-wrap">🧬</div>
-        <div class="mc-title">Лаборатория</div>
-        <div class="mc-desc">Прокачивай силу активного монстра</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ ARENA SELECT ═══ -->
-  <div class="screen" id="arena">
-    <div class="back-row"><button class="btn-back" data-go="menu">← Назад</button><div class="screen-title">⚔️ Арена</div></div>
-    <div class="opponent-scroll" id="opponentScroll" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-bottom:8px"></div>
-  </div>
-
-  <!-- ═══ BATTLE ═══ -->
-  <div class="screen" id="battle">
-    <div class="battle-top" style="display:flex;gap:12px;align-items:center;flex-shrink:0;padding:4px 0 8px">
-      <div class="hp-block" style="flex:1">
-        <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700"><span id="pName">—</span><span id="pHpText">0/0</span></div>
-        <div style="height:8px;border-radius:4px;background:#000;border:1px solid var(--border-card);overflow:hidden;margin-top:4px"><div class="hp-fill" id="pHpFill" style="height:100%;background:var(--gradient-accent);width:100%;transition:width .3s ease"></div></div>
-      </div>
-      <div style="font-size:10px;color:var(--text-tertiary);font-family:'Orbitron',monospace;flex-shrink:0">VS</div>
-      <div class="hp-block" style="flex:1">
-        <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700"><span id="eHpText">0/0</span><span id="eName">—</span></div>
-        <div style="height:8px;border-radius:4px;background:#000;border:1px solid var(--border-card);overflow:hidden;margin-top:4px"><div class="hp-fill enemy" id="eHpFill" style="height:100%;background:var(--gradient-danger);width:100%;transition:width .3s ease"></div></div>
-      </div>
-    </div>
-
-    <div id="arenaStage" style="flex:1;position:relative;border-radius:var(--radius-lg);margin:4px 0 8px;background:radial-gradient(ellipse at 50% 100%,rgba(124,92,252,.08),transparent 70%),linear-gradient(180deg,#120c30,#0a0620);border:1px solid var(--border-card);overflow:hidden;display:flex;align-items:center;justify-content:space-around">
-      <div class="fighter player" id="playerSprite" style="font-size:64px;position:relative;z-index:2;transition:transform .12s ease">⚡</div>
-      <div class="fighter enemy" id="enemySprite" style="font-size:64px;position:relative;z-index:2;transition:transform .12s ease">⚡</div>
-      <div class="result-overlay" id="resultOverlay" style="position:absolute;inset:0;background:rgba(8,6,26,.9);backdrop-filter:blur(20px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;z-index:30;opacity:0;pointer-events:none;transition:opacity .3s ease">
-        <div class="result-emoji" id="resultEmoji" style="font-size:56px">🏆</div>
-        <div class="result-title" id="resultTitle" style="font-size:24px;font-weight:900;font-family:'Orbitron',monospace">ПОБЕДА</div>
-        <div class="result-reward" id="resultReward" style="font-size:14px;color:var(--text-secondary)">+0 монет</div>
-        <button class="btn-primary" id="resultContinue" style="margin-top:8px">Продолжить</button>
-        <button class="btn-secondary" data-go="arena">К списку</button>
-      </div>
-    </div>
-
-    <div id="battleLog" style="flex-shrink:0;font-size:13px;color:var(--text-secondary);text-align:center;min-height:20px;margin-bottom:6px">Бой начинается...</div>
-    <div id="moveGrid" style="flex-shrink:0;display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
-  </div>
-
-  <!-- ═══ COLLECTION ═══ -->
-  <div class="screen" id="collection">
-    <div class="back-row"><button class="btn-back" data-go="menu">← Назад</button><div class="screen-title">📒 Коллекция</div></div>
-    <div id="collectionGrid" style="flex:1;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-bottom:8px;align-content:start"></div>
-  </div>
-
-  <!-- ═══ SHOP ═══ -->
-  <div class="screen" id="shop">
-    <div class="back-row"><button class="btn-back" data-go="menu">← Назад</button><div class="screen-title">🛒 Лавка</div><div class="stat-chip" style="margin-left:auto"><div class="chip-icon chip-gold">🪙</div><span id="coinsShop">0</span></div></div>
-    <div id="shopList" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-bottom:8px"></div>
-  </div>
-
-  <!-- ═══ LAB ═══ -->
-  <div class="screen" id="lab">
-    <div class="back-row"><button class="btn-back" data-go="menu">← Назад</button><div class="screen-title">🧬 Лаборатория</div></div>
-    <div style="flex:1;display:flex;flex-direction:column;gap:14px;overflow-y:auto;padding-bottom:8px">
-      <div id="labPreview" style="text-align:center;padding:20px;border-radius:var(--radius-lg);background:var(--gradient-card);border:1px solid var(--border-card)">
-        <div id="labEmoji" style="font-size:72px;margin-bottom:6px">⚡</div>
-        <div id="labName" style="font-weight:800;font-size:18px">—</div>
-        <div id="labLevel" style="font-size:12px;color:var(--text-tertiary);margin-top:2px">Уровень 1</div>
-      </div>
-      <div style="background:var(--gradient-card);border:1px solid var(--border-card);border-radius:var(--radius-lg);padding:16px">
-        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span>⚔️ Атака</span><span id="labAtk">0</span></div>
-        <div style="height:6px;border-radius:3px;background:#000;border:1px solid var(--border-card);overflow:hidden;margin-bottom:12px"><div id="labAtkBar" style="height:100%;background:var(--gradient-accent);width:0%;transition:width .3s ease"></div></div>
-        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span>❤️ Здоровье</span><span id="labHp">0</span></div>
-        <div style="height:6px;border-radius:3px;background:#000;border:1px solid var(--border-card);overflow:hidden"><div id="labHpBar" style="height:100%;background:var(--gradient-success);width:0%;transition:width .3s ease"></div></div>
-      </div>
-      <button class="btn-primary w-full" id="labUpgradeBtn">Прокачать за 🪙 <span id="labCost">50</span></button>
-    </div>
-  </div>
-
-  <!-- ═══ WALLET (DEPOSIT/WITHDRAW/CODES) ═══ -->
-  <div class="screen" id="wallet">
-    <div class="back-row"><button class="btn-back" data-go="menu">← Назад</button><div class="screen-title">💰 Кошелёк</div></div>
-    <div style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:14px;padding-bottom:8px">
-      <div style="background:var(--gradient-card);border:1px solid var(--border-card);border-radius:var(--radius-lg);padding:20px;text-align:center">
-        <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:4px">Баланс</div>
-        <div style="font-size:32px;font-weight:900;font-family:'Orbitron',monospace;background:var(--gradient-success);-webkit-background-clip:text;-webkit-text-fill-color:transparent"><span id="walletBalance">0</span> ₽</div>
-      </div>
-      <button class="btn-primary w-full" id="depositBtn">💳 Пополнить баланс</button>
-      <button class="btn-secondary w-full" id="withdrawBtn">💸 Вывести средства</button>
-
-      <div style="background:var(--gradient-card);border:1px solid var(--border-card);border-radius:var(--radius-lg);padding:16px;margin-top:8px">
-        <div style="font-weight:700;font-size:14px;margin-bottom:8px">🎁 Промо-код</div>
-        <div style="display:flex;gap:8px">
-          <input type="text" id="codeInput" placeholder="Введите код" style="flex:1;background:var(--bg-surface);border:1px solid var(--border-card);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text-primary);font-size:14px;outline:none;font-family:'Inter',sans-serif">
-          <button class="btn-primary" id="redeemBtn" style="padding:10px 18px;font-size:13px">Активировать</button>
+    <!-- Простейший HUD (будет заменён на полноценный UI из src/ui) -->
+    <div id="hud" class="hidden">
+        <div id="resources">
+            Золото: <span id="gold">0</span> |
+            Эликсир: <span id="elixir">0</span>
         </div>
-      </div>
-
-      <div style="background:var(--gradient-card);border:1px solid var(--border-card);border-radius:var(--radius-lg);padding:16px">
-        <div style="font-weight:700;font-size:14px;margin-bottom:8px">📜 Последние операции</div>
-        <div id="txHistory" style="font-size:12px;color:var(--text-tertiary);min-height:40px;display:flex;align-items:center;justify-content:center">Пока нет операций</div>
-      </div>
+        <button id="buildBtn">Строить</button>
+        <button id="trainBtn">Тренировать</button>
+        <button id="battlePassBtn">Батл‑пас</button>
     </div>
-  </div>
 
-  <!-- ═══ BATTLE PASS ═══ -->
-  <div class="screen" id="battlepass">
-    <div class="back-row"><button class="btn-back" data-go="menu">← Назад</button><div class="screen-title">🎫 Боевой пропуск</div></div>
-    <div style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding-bottom:8px">
-      <div style="background:var(--gradient-card);border:1px solid var(--border-card);border-radius:var(--radius-lg);padding:20px;text-align:center">
-        <div style="font-size:14px;color:var(--text-secondary);margin-bottom:4px">Твой уровень пропуска</div>
-        <div style="font-size:28px;font-weight:900;font-family:'Orbitron',monospace;background:var(--gradient-accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent" id="bpLevel">1</div>
-      </div>
-      <div style="background:var(--gradient-card);border:1px solid var(--border-card);border-radius:var(--radius-lg);padding:16px">
-        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:8px"><span>🎯 Опыт пропуска</span><span id="bpXpText">0 / 100</span></div>
-        <div style="height:8px;border-radius:4px;background:#000;border:1px solid var(--border-card);overflow:hidden"><div id="bpXpFill" style="height:100%;background:var(--gradient-accent);width:0%;transition:width .3s ease"></div></div>
-      </div>
-      <div id="bpRewards" style="flex:1;display:flex;flex-direction:column;gap:8px"></div>
-      <button class="btn-danger w-full" id="bpBuyBtn">🔥 Купить премиум пропуск — 199 ₽</button>
-    </div>
-  </div>
+    <!-- Подключаем модули проекта (type="module" позволяет использовать import/export) -->
+    <script src="src/utils/utils.js" type="module"></script>
+    <script src="src/utils/storage.js" type="module"></script>
+    <script src="src/utils/loader.js" type="module"></script>
+    <script src="src/engine/input.js" type="module"></script>
+    <script src="src/engine/engine.js" type="module"></script>
+    <script src="src/entities/hero.js" type="module"></script>
+    <script src="src/entities/building.js" type="module"></script>
+    <script src="src/entities/troop.js" type="module"></script>
+    <script src="src/map/tilemap.js" type="module"></script>
+    <script src="src/map/pathfinding.js" type="module"></script>
+    <script src="src/ui/hud.js" type="module"></script>
+    <script src="src/ui/menu.js" type="module"></script>
+    <script src="src/ui/battlePass.js" type="module"></script>
+    <script src="src/ui/shop.js" type="module"></script>
+    <script src="src/main.js" type="module"></script>
+</body>
+</html>
 
-  <!-- ═══ DEPOSIT MODAL (hidden inline) ═══ -->
-  <div id="depositModal" style="position:fixed;inset:0;z-index:200;background:rgba(8,6,26,.9);backdrop-filter:blur(30px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px;opacity:0;pointer-events:none;transition:opacity .25s ease">
-    <div style="font-size:20px;font-weight:800">💳 Пополнение</div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
-      <button class="btn-primary dep-amt" data-amt="100" style="padding:12px 24px;font-size:15px;font-weight:800">100 ₽</button>
-      <button class="btn-primary dep-amt" data-amt="300" style="padding:12px 24px;font-size:15px;font-weight:800">300 ₽</button>
-      <button class="btn-primary dep-amt" data-amt="500" style="padding:12px 24px;font-size:15px;font-weight:800">500 ₽</button>
-      <button class="btn-primary dep-amt" data-amt="1000" style="padding:12px 24px;font-size:15px;font-weight:800">1 000 ₽</button>
-      <button class="btn-primary dep-amt" data-amt="2000" style="padding:12px 24px;font-size:15px;font-weight:800">2 000 ₽</button>
-    </div>
-    <div style="font-size:12px;color:var(--text-tertiary);text-align:center">Платежи обрабатываются через защищённый шлюз</div>
-    <button class="btn-secondary" id="depCloseBtn">Отмена</button>
-  </div>
+2. style.css
 
-  <div class="toast" id="toast"></div>
-</div>
+/* Общий сброс и базовые стили */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: #111;
+    color: #eee;
+    font-family: Arial, Helvetica, sans-serif;
+}
 
-<script>
-// Canvas particles background
-(function initParticles(){
-  const c = document.getElementById('bg-canvas');
-  const ctx = c.getContext('2d');
-  let w,h,pts=[];
-  function resize(){w=c.width=innerWidth;h=c.height=innerHeight}
-  window.addEventListener('resize',resize); resize();
-  for(let i=0;i<50;i++) pts.push({
-    x:Math.random()*w,y:Math.random()*h,
-    vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,
-    r:Math.random()*2+1,a:Math.random()*.4+.1
-  });
-  function draw(){
-    ctx.clearRect(0,0,w,h);
-    pts.forEach(p=>{
-      p.x+=p.vx;p.y+=p.vy;
-      if(p.x<0)p.x=w;if(p.x>w)p.x=0;if(p.y<0)p.y=h;if(p.y>h)p.y=0;
-      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      ctx.fillStyle=`rgba(124,92,252,${p.a})`;ctx.fill();
-    });
-    requestAnimationFrame(draw);
-  }
-  draw();
-})();
+/* Контейнер для canvas PixiJS */
+#game-container {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
 
-// Floating monster bg
-(function initMonsterBg(){
-  const wrap=document.getElementById('monsterBg');
-  const icons=['⚡','🔥','💧','🌪️','🪐','☄️','⚙️','🔮'];
-  for(let i=0;i<12;i++){
-    const s=document.createElement('span');
-    s.textContent=icons[i%icons.length];
-    s.style.left=Math.random()*85+5+'%';
-    s.style.animationDuration=(12+Math.random()*14)+'s';
-    s.style.animationDelay=(Math.random()*20)+'s';
-    s.style.fontSize=(50+Math.random()*70)+'px';
-    wrap.appendChild(s);
-  }
-})();
+/* HUD – панель ресурсов и кнопки */
+#hud {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(0,0,0,0.6);
+    padding: 12px;
+    border-radius: 8px;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+#hud #resources {
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+#hud button {
+    padding: 6px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    background: #4a90e2;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+#hud button:hover {
+    background: #357ab8;
+}
+.hidden { display: none; }
 
-// Prevent zoom/touch
-document.addEventListener('dblclick',e=>e.preventDefault());
-document.addEventListener('gesturestart',e=>e.preventDefault());
-document.addEventListener('touchend',function(e){const n=Date.now();if(n-lastTouchEnd<=300)e.preventDefault();lastTouchEnd=n},false);
-let lastTouchEnd=0;
-document.addEventListener('touchmove',function(e){if(e.touches.length>1)e.preventDefault()},{passive:false});
-const tg = window.Telegram?.WebApp;
-if(tg){tg.ready();tg.expand();}
+3. src/utils/utils.js
 
-// ─── DATA ───
-const MONSTERS=[
-  {id:'rex',   emoji:'🦖',name:'Рекс',     type:'Огонь',  baseAtk:14,baseHp:60, cost:0,  unlocked:true},
-  {id:'ghost', emoji:'👻',name:'Бууги',    type:'Дух',    baseAtk:11,baseHp:50, cost:0,  unlocked:true},
-  {id:'drag',  emoji:'🐲',name:'Драккон',  type:'Молния', baseAtk:18,baseHp:55, cost:120,unlocked:false},
-  {id:'oct',   emoji:'🐙',name:'Кракулос', type:'Вода',   baseAtk:13,baseHp:70, cost:90, unlocked:false},
-  {id:'spid',  emoji:'🕷️',name:'Арахнум',  type:'Яд',     baseAtk:16,baseHp:48, cost:80, unlocked:false},
-  {id:'bat',   emoji:'🦇',name:'Никтус',   type:'Тьма',   baseAtk:15,baseHp:52, cost:70, unlocked:false},
-  {id:'troll', emoji:'👹',name:'Грумбл',   type:'Земля',  baseAtk:20,baseHp:65, cost:160,unlocked:false},
-  {id:'unic',  emoji:'🦄',name:'Люминара', type:'Свет',   baseAtk:17,baseHp:58, cost:200,unlocked:false},
-];
+// uтильные функции, используемые во всём проекте
+export const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+export const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+export const distance = (x1, y1, x2, y2) => Math.hypot(x2 - x1, y2 - y1);
 
-const ENEMIES=[
-  {name:'Слизнюк',   emoji:'🟢',hp:30, atk:6,  diff:'easy',reward:15},
-  {name:'Мумия',     emoji:'🧟',hp:45, atk:9,  diff:'easy',reward:22},
-  {name:'Гоблин',    emoji:'👺',hp:55, atk:12, diff:'mid', reward:30},
-  {name:'Циклоп',    emoji:'🧌',hp:70, atk:15, diff:'mid', reward:40},
-  {name:'Демон',     emoji:'😈',hp:85, atk:19, diff:'hard',reward:55},
-  {name:'Кибер-Босс',emoji:'🤖',hp:110,atk:23, diff:'hard',reward:80},
-];
-
-const MOVES=[
-  {name:'Удар',       icon:'👊',power:[8,14], cls:'move-1'},
-  {name:'Огонь-залп', icon:'🔥',power:[12,20],cls:'move-2'},
-  {name:'Защита',     icon:'🛡️',power:[0,0],  cls:'move-3',heal:true},
-  {name:'Суперудар',  icon:'💥',power:[18,28],cls:'move-4'},
-];
-
-const BP_REWARDS=[
-  {lvl:1, free:'🪙 50 монет',      premium:'🪙 150 монет'},
-  {lvl:2, free:'🧪 Зелье силы',    premium:'🦇 Никтус (монстр)'},
-  {lvl:3, free:'🪙 100 монет',     premium:'🪙 300 монет'},
-  {lvl:4, free:'🛡️ Щит защиты',   premium:'🕷️ Арахнум (монстр)'},
-  {lvl:5, free:'🪙 200 монет',     premium:'🐲 Драккон (монстр)'},
-  {lvl:6, free:'🧬 Апгрейд x1',   premium:'🪙 500 монет'},
-  {lvl:7, free:'🪙 300 монет',     premium:'🦄 Люминара (монстр)'},
-  {lvl:8, free:'🎖️ Значок арены', premium:'🪙 1000 монет'},
-];
-
-// ─── STATE ───
-let state={
-  coins:60, wins:0, rubles:0,
-  owned:['rex','ghost'],
-  activeId:'rex',
-  levels:{},
-  txHistory:[],
-  bp:{level:1,xp:0,premium:false,claimed:[]},
-  usedCodes:[],
+/**
+ * Сохранение данных в localStorage (обёртка с try/catch)
+ * @param {string} key
+ * @param {any} value
+ */
+export const saveToLocal = (key, value) => {
+    try {
+        localStorage.setItem(key, JSON.stringify(value));
+    } catch (e) {
+        console.warn('Не удалось сохранить в localStorage:', e);
+    }
 };
 
-function lvl(id){return state.levels[id]||1;}
-function monster(id){return MONSTERS.find(m=>m.id===id);}
-function monAtk(id){const m=monster(id);return Math.round(m.baseAtk*(1+(lvl(id)-1)*.18));}
-function monHp(id){const m=monster(id);return Math.round(m.baseHp*(1+(lvl(id)-1)*.16));}
-function upgradeCost(id){return Math.round(40*Math.pow(1.45,lvl(id)-1));}
-
-function save(){try{localStorage.setItem('monxtrix_v2',JSON.stringify(state));}catch(e){}}
-function load(){try{const r=localStorage.getItem('monxtrix_v2');if(r)state=Object.assign(state,JSON.parse(r));}catch(e){}}
-load();
-
-// ─── NAVIGATION ───
-const screens={};
-document.querySelectorAll('.screen').forEach(s=>screens[s.id]=s);
-
-function goTo(id){
-  Object.values(screens).forEach(s=>s.classList.remove('active'));
-  if(screens[id]){screens[id].classList.add('active');}
-  if(id==='menu')renderMenu();
-  if(id==='arena')renderArena();
-  if(id==='collection')renderCollection();
-  if(id==='shop')renderShop();
-  if(id==='lab')renderLab();
-  if(id==='wallet')renderWallet();
-  if(id==='battlepass')renderBattlePass();
-}
-
-document.addEventListener('click',e=>{
-  const t=e.target.closest('[data-go]');
-  if(t)goTo(t.dataset.go);
-});
-
-// ─── TOAST ───
-function toast(msg,color){
-  const el=document.getElementById('toast');
-  el.textContent=msg;
-  el.style.borderColor=color||'var(--border-card)';
-  el.classList.add('show');
-  clearTimeout(el._t);
-  el._t=setTimeout(()=>el.classList.remove('show'),2000);
-}
-
-// ─── SPLASH ───
-let loadP=0;
-const loadFill=document.getElementById('loadFill');
-const splashHint=document.getElementById('splashHint');
-const hints=['initializing...','loading monsters...','preparing arena...','almost ready...'];
-let hintI=0;
-const splashTimer=setInterval(()=>{
-  loadP+=Math.random()*12+5;
-  if(loadP>=100){
-    loadP=100;clearInterval(splashTimer);
-    splashHint.textContent='нажми, чтобы начать ▶';
-  } else {
-    hintI=(hintI+1)%hints.length;
-    splashHint.textContent=hints[hintI];
-  }
-  loadFill.style.width=loadP+'%';
-},220);
-
-document.getElementById('splash').addEventListener('click',()=>{
-  if(loadP<100)return;
-  goTo('menu');
-});
-
-// ─── MENU ───
-function renderMenu(){
-  document.getElementById('coinsTop').textContent=state.coins;
-  document.getElementById('winsTop').textContent=state.wins;
-  document.getElementById('rublesTop').textContent=state.rubles;
-}
-
-// ─── ARENA SELECT ───
-const DIFF_STYLES={
-  easy:{label:'ЛЕГКО',bg:'rgba(57,255,122,.12)',color:'#39ff7a'},
-  mid: {label:'СРЕДНЕ',bg:'rgba(255,214,60,.12)',color:'#ffd63c'},
-  hard:{label:'СЛОЖНО',bg:'rgba(255,60,172,.12)',color:'#ff3cac'},
+/**
+ * Чтение данных из localStorage
+ * @param {string} key
+ * @param {any} [defaultValue] значение по умолчанию, если ключ отсутствует или данные некорректны
+ * @returns {any}
+ */
+export const loadFromLocal = (key, defaultValue = null) => {
+    try {
+        const raw = localStorage.getItem(key);
+        if (raw === null) return defaultValue;
+        return JSON.parse(raw);
+    } catch (e) {
+        console.warn('Ошибка чтения localStorage:', e);
+        return defaultValue;
+    }
 };
 
-function renderArena(){
-  const wrap=document.getElementById('opponentScroll');
-  wrap.innerHTML='';
-  ENEMIES.forEach((en,i)=>{
-    const ds=DIFF_STYLES[en.diff];
-    const div=document.createElement('div');
-    div.style.cssText=`display:flex;align-items:center;gap:12px;background:var(--gradient-card);border:1px solid var(--border-card);border-radius:var(--radius-lg);padding:14px;cursor:pointer;transition:all .15s ease`;
-    div.innerHTML=`
-      <div style="width:52px;height:52px;border-radius:var(--radius-md);background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0">${en.emoji}</div>
-      <div style="flex:1">
-        <div style="font-weight:800;font-size:15px">${en.name}</div>
-        <div style="font-size:12px;color:var(--text-tertiary);margin-top:2px">❤️ ${en.hp} · ⚔️ ${en.atk} · 🪙 ${en.reward}</div>
-      </div>
-      <div style="font-size:10px;font-weight:800;padding:4px 10px;border-radius:8px;background:${ds.bg};color:${ds.color};flex-shrink:0">${ds.label}</div>
-    `;
-    div.addEventListener('click',()=>startBattle(i));
-    div.addEventListener('touchstart',()=>div.style.transform='scale(.97)',{passive:true});
-    div.addEventListener('touchend',()=>div.style.transform='',{passive:true});
-    wrap.appendChild(div);
-  });
-}
+4. src/utils/storage.js
 
-// ─── COLLECTION ───
-function renderCollection(){
-  const grid=document.getElementById('collectionGrid');
-  grid.innerHTML='';
-  MONSTERS.forEach(m=>{
-    const owned=state.owned.includes(m.id);
-    const isActive=state.activeId===m.id;
-    const card=document.createElement('div');
-    card.style.cssText=`background:var(--gradient-card);border:1px solid ${isActive?'var(--accent-purple)':'var(--border-card)'};border-radius:var(--radius-lg);padding:16px;display:flex;flex-direction:column;align-items:center;gap:6px;position:relative;${owned?'cursor:pointer':'filter:grayscale(1) brightness(.45)'}`;
-    card.innerHTML=`
-      ${!owned?'<div style="position:absolute;top:8px;right:10px;font-size:13px;opacity:.7">🔒</div>':''}
-      ${isActive?'<div style="position:absolute;top:8px;left:10px;font-size:9px;font-weight:800;padding:2px 8px;border-radius:6px;background:var(--accent-purple-glow);color:var(--accent-purple)">АКТИВЕН</div>':''}
-      <div style="font-size:44px;margin-top:${isActive?'10px':'0'}">${m.emoji}</div>
-      <div style="font-weight:800;font-size:13px;text-align:center">${m.name}</div>
-      <div style="font-size:11px;color:var(--text-tertiary)">${m.type} · Ур.${lvl(m.id)}</div>
-    `;
-    if(owned){
-      card.addEventListener('click',()=>{
-        state.activeId=m.id;save();renderCollection();
-        toast(m.name+' выбран активным монстром');
-      });
+// Обёртка над localStorage для игрового прогресса (ресурсы, уровни, разблокированный контент)
+export class GameStorage {
+    static SAVE_KEY = 'clashofclones_save';
+
+    /**
+     * Сохранить текущее состояние игры
+     * @param {Object} state объект с полями: gold, elixir, heroLevel, buildings[], troops[]
+     */
+    static save(state) {
+        saveToLocal(GameStorage.SAVE_KEY, state);
     }
-    grid.appendChild(card);
-  });
-}
 
-// ─── SHOP ───
-function renderShop(){
-  document.getElementById('coinsShop').textContent=state.coins;
-  const list=document.getElementById('shopList');
-  list.innerHTML='';
-  MONSTERS.filter(m=>m.cost>0).forEach(m=>{
-    const owned=state.owned.includes(m.id);
-    const div=document.createElement('div');
-    div.style.cssText=`display:flex;align-items:center;gap:12px;background:var(--gradient-card);border:1px solid var(--border-card);border-radius:var(--radius-lg);padding:14px`;
-    div.innerHTML=`
-      <div style="width:52px;height:52px;border-radius:var(--radius-md);background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;font-size:30px;flex-shrink:0">${m.emoji}</div>
-      <div style="flex:1">
-        <div style="font-weight:800;font-size:14px">${m.name} · ${m.type}</div>
-        <div style="font-size:11px;color:var(--text-tertiary);margin-top:2px">⚔️ ${m.baseAtk} · ❤️ ${m.baseHp}</div>
-      </div>
-      <button class="btn-buy" style="border:none;border-radius:var(--radius-sm);padding:10px 14px;font-weight:800;font-size:12px;cursor:pointer;flex-shrink:0;background:${owned?'var(--accent-green-glow)':'var(--gradient-accent)'};color:${owned?'var(--accent-green)':'#fff'};${owned?'pointer-events:none':''}">${owned?'✅ Есть':'🪙 '+m.cost}</button>
-    `;
-    if(!owned){
-      div.querySelector('button').addEventListener('click',()=>{
-        if(state.coins<m.cost){toast('Не хватает монет 🪙','var(--accent-pink)');return;}
-        state.coins-=m.cost;state.owned.push(m.id);save();
-        toast(m.name+' добавлен в коллекцию! 🎉','var(--accent-green)');
-        renderShop();
-      });
+    /**
+     * Загрузить сохранённое состояние, либо вернуть объект со значениями по умолчанию
+     * @returns {Object}
+     */
+    static load() {
+        const saved = loadFromLocal(GameStorage.SAVE_KEY);
+        if (saved) return saved;
+        // Значения по умолчанию для новой игры
+        return {
+            gold: 1000,
+            elixir: 500,
+            heroLevel: 1,
+            buildings: [],   // массив объектов {type, level, x, y}
+            troops: [],      // массив объектов {type, level, x, y, targetX, targetY}
+            battlePassLevel: 0,
+            dailyQuests: []  // будем заполнять позже
+        };
     }
-    list.appendChild(div);
-  });
-}
 
-// ─── LAB ───
-function renderLab(){
-  const m=monster(state.activeId);
-  document.getElementById('labEmoji').textContent=m.emoji;
-  document.getElementById('labName').textContent=m.name;
-  document.getElementById('labLevel').textContent='Уровень '+lvl(m.id);
-  const atk=monAtk(m.id),hp=monHp(m.id);
-  document.getElementById('labAtk').textContent=atk;
-  document.getElementById('labHp').textContent=hp;
-  document.getElementById('labAtkBar').style.width=Math.min(100,atk/40*100)+'%';
-  document.getElementById('labHpBar').style.width=Math.min(100,hp/140*100)+'%';
-  const cost=upgradeCost(m.id);
-  document.getElementById('labCost').textContent=cost;
-  const btn=document.getElementById('labUpgradeBtn');
-  btn.disabled=state.coins<cost;
-  btn.onclick=()=>{
-    if(state.coins<cost)return;
-    state.coins-=cost;
-    state.levels[m.id]=(lvl(m.id)+1);
-    save();
-    toast(m.name+' прокачан до уровня '+lvl(m.id)+'! 💪','var(--accent-green)');
-    renderLab();
-  };
-}let battle=null;
-
-function startBattle(enemyIndex){
-  const enemyBase=ENEMIES[enemyIndex];
-  const pm=monster(state.activeId);
-  battle={
-    enemyIndex,
-    pName:pm.name,pEmoji:pm.emoji,pMaxHp:monHp(pm.id),pHp:monHp(pm.id),pAtk:monAtk(pm.id),
-    eName:enemyBase.name,eEmoji:enemyBase.emoji,eMaxHp:enemyBase.hp,eHp:enemyBase.hp,eAtk:enemyBase.atk,
-    reward:enemyBase.reward,over:false,defending:false,turn:0,
-  };
-  document.getElementById('playerSprite').textContent=battle.pEmoji;
-  document.getElementById('enemySprite').textContent=battle.eEmoji;
-  document.getElementById('playerSprite').className='fighter player';
-  document.getElementById('enemySprite').className='fighter enemy';
-  document.getElementById('playerSprite').style.cssText='font-size:64px;position:relative;z-index:2;transition:transform .12s ease;transform:scaleX(-1)';
-  document.getElementById('enemySprite').style.cssText='font-size:64px;position:relative;z-index:2;transition:transform .12s ease';
-  document.getElementById('resultOverlay').style.opacity='0';
-  document.getElementById('resultOverlay').style.pointerEvents='none';
-  renderMoves();
-  updateHpBars();
-  setLog('⚔️ '+battle.eName+' преграждает путь!');
-  goTo('battle');
-}
-
-function renderMoves(){
-  const grid=document.getElementById('moveGrid');
-  grid.innerHTML='';
-  const colors=[
-    {bg:'linear-gradient(135deg,#39ff7a,#00e5ff)',color:'#08061a'},
-    {bg:'linear-gradient(135deg,#00e5ff,#7c5cfc)',color:'#fff'},
-    {bg:'linear-gradient(135deg,#ffd63c,#ff8a3c)',color:'#08061a'},
-    {bg:'linear-gradient(135deg,#ff3cac,#ff8a3c)',color:'#fff'},
-  ];
-  MOVES.forEach((mv,i)=>{
-    const btn=document.createElement('button');
-    const c=colors[i];
-    btn.style.cssText=`border:none;border-radius:var(--radius-md);padding:14px 10px;font-weight:800;font-size:13px;color:${c.color};cursor:pointer;text-align:left;background:${c.bg};transition:transform .08s ease;position:relative;overflow:hidden`;
-    btn.innerHTML=`<span style="font-size:18px;margin-right:4px">${mv.icon}</span>${mv.name}<span style="display:block;font-size:10px;opacity:.7;margin-top:2px;font-weight:600">${mv.heal?'восстановить силы':'урон '+mv.power[0]+'–'+mv.power[1]}</span>`;
-    btn.addEventListener('click',()=>playerMove(i));
-    btn.addEventListener('touchstart',()=>btn.style.transform='scale(.94)',{passive:true});
-    btn.addEventListener('touchend',()=>btn.style.transform='',{passive:true});
-    grid.appendChild(btn);
-  });
-}
-
-function setMovesDisabled(disabled){
-  document.querySelectorAll('#moveGrid button').forEach(b=>b.disabled=disabled);
-}
-
-function updateHpBars(){
-  document.getElementById('pHpFill').style.width=Math.max(0,battle.pHp/battle.pMaxHp*100)+'%';
-  document.getElementById('eHpFill').style.width=Math.max(0,battle.eHp/battle.eMaxHp*100)+'%';
-  document.getElementById('pHpText').textContent=Math.max(0,battle.pHp)+'/'+battle.pMaxHp;
-  document.getElementById('eHpText').textContent=Math.max(0,battle.eHp)+'/'+battle.eMaxHp;
-}
-
-function setLog(msg){document.getElementById('battleLog').textContent=msg;}
-
-function floatDmg(targetEl,text,good){
-  const stage=document.getElementById('arenaStage');
-  const rect=targetEl.getBoundingClientRect();
-  const sr=stage.getBoundingClientRect();
-  const el=document.createElement('div');
-  el.textContent=text;
-  el.style.cssText=`position:absolute;font-weight:900;font-size:22px;pointer-events:none;z-index:10;
-    left:${rect.left-sr.left+rect.width/2-14}px;top:${rect.top-sr.top}px;
-    color:${good?'var(--accent-green)':'var(--accent-pink)'};
-    text-shadow:0 2px 8px ${good?'rgba(57,255,122,.5)':'rgba(255,60,172,.5)'};
-    animation:dmgFloat .85s ease-out forwards`;
-  if(!document.getElementById('dmgStyle')){
-    const st=document.createElement('style');
-    st.id='dmgStyle';
-    st.textContent='@keyframes dmgFloat{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-55px) scale(1.3);opacity:0}}';
-    document.head.appendChild(st);
-  }
-  stage.appendChild(el);
-  setTimeout(()=>el.remove(),900);
-}
-
-function spawnSpark(targetEl,emoji){
-  const stage=document.getElementById('arenaStage');
-  const rect=targetEl.getBoundingClientRect();
-  const sr=stage.getBoundingClientRect();
-  const el=document.createElement('div');
-  el.textContent=emoji;
-  el.style.cssText=`position:absolute;font-size:32px;pointer-events:none;z-index:9;
-    left:${rect.left-sr.left+rect.width/2-16}px;top:${rect.top-sr.top+rect.height/2-16}px;
-    animation:sparkPop .4s ease-out forwards`;
-  if(!document.getElementById('sparkStyle')){
-    const st=document.createElement('style');
-    st.id='sparkStyle';
-    st.textContent='@keyframes sparkPop{0%{transform:scale(.1) rotate(0);opacity:1}100%{transform:scale(2) rotate(45deg);opacity:0}}';
-    document.head.appendChild(st);
-  }
-  stage.appendChild(el);
-  setTimeout(()=>el.remove(),420);
-}
-
-function shakeEl(el,isPlayer){
-  const base=isPlayer?'scaleX(-1)':'';
-  el.style.animation='none';
-  el.style.filter='brightness(2.5) drop-shadow(0 0 12px #fff)';
-  setTimeout(()=>{
-    el.style.filter='';
-    el.style.animation=isPlayer?'shakeP .28s linear':'shakeE .28s linear';
-    if(!document.getElementById('shakeStyle')){
-      const st=document.createElement('style');
-      st.id='shakeStyle';
-      st.textContent=`
-        @keyframes shakeP{0%,100%{transform:translateX(0) scaleX(-1)}25%{transform:translateX(-8px) scaleX(-1)}75%{transform:translateX(8px) scaleX(-1)}}
-        @keyframes shakeE{0%,100%{transform:translateX(0)}25%{transform:translateX(8px)}75%{transform:translateX(-8px)}}
-      `;
-      document.head.appendChild(st);
+    /**
+     * Очистить сохранение (например, для отладки)
+     */
+    static clear() {
+        localStorage.removeItem(GameStorage.SAVE_KEY);
     }
-    setTimeout(()=>{el.style.animation='';},300);
-  },80);
 }
 
-function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+5. src/utils/loader.js
 
-function playerMove(i){
-  if(!battle||battle.over)return;
-  setMovesDisabled(true);
-  const mv=MOVES[i];
-  const enemyEl=document.getElementById('enemySprite');
-  const playerEl=document.getElementById('playerSprite');
+// Простой загрузчик текстур и аудио через PIXI.Loader
+import * as PIXI from 'pixi.js';
 
-  if(mv.heal){
-    const healAmt=Math.round(battle.pMaxHp*.22);
-    battle.pHp=Math.min(battle.pMaxHp,battle.pHp+healAmt);
-    battle.defending=true;
-    floatDmg(playerEl,'+'+healAmt,true);
-    spawnSpark(playerEl,'✨');
-    setLog('🛡️ '+battle.pName+' восстанавливает силы и уходит в защиту!');
-    updateHpBars();
-    setTimeout(enemyTurn,900);
-    return;
-  }
-
-  battle.defending=false;
-  const crit=Math.random()<.12;
-  let dmg=rand(mv.power[0],mv.power[1])+Math.round(battle.pAtk*.4);
-  if(crit)dmg=Math.round(dmg*1.8);
-  battle.eHp=Math.max(0,battle.eHp-dmg);
-  shakeEl(enemyEl,false);
-  spawnSpark(enemyEl,mv.icon);
-  floatDmg(enemyEl,(crit?'💥 КРИТ! -':'-')+dmg,false);
-  setLog(crit?`💥 КРИТИЧЕСКИЙ УДАР! ${battle.pName} наносит ${dmg} урона!`:`${battle.pName} использует «${mv.name}»! −${dmg} HP`);
-  updateHpBars();
-
-  // add BP xp
-  addBpXp(8);
-
-  if(battle.eHp<=0){
-    enemyEl.style.transition='all .5s ease';
-    enemyEl.style.transform='translateY(40px) rotate(-70deg)';
-    enemyEl.style.opacity='.1';
-    battle.over=true;
-    setTimeout(()=>endBattle(true),600);
-    return;
-  }
-  setTimeout(enemyTurn,900);
-}
-
-function enemyTurn(){
-  if(!battle||battle.over)return;
-  const playerEl=document.getElementById('playerSprite');
-  let dmg=rand(Math.round(battle.eAtk*.65),battle.eAtk);
-  if(battle.defending)dmg=Math.round(dmg*.3);
-  battle.pHp=Math.max(0,battle.pHp-dmg);
-  shakeEl(playerEl,true);
-  spawnSpark(playerEl,'💢');
-  floatDmg(playerEl,'-'+dmg,false);
-  setLog(battle.defending?`🛡️ ${battle.eName} атакует! −${dmg} HP (смягчено защитой)`:`${battle.eName} атакует! −${dmg} HP`);
-  updateHpBars();
-
-  if(battle.pHp<=0){
-    playerEl.style.transition='all .5s ease';
-    playerEl.style.transform='translateY(40px) rotate(80deg) scaleX(-1)';
-    playerEl.style.opacity='.1';
-    battle.over=true;
-    setTimeout(()=>endBattle(false),600);
-    return;
-  }
-  setMovesDisabled(false);
-}
-
-function endBattle(won){
-  const overlay=document.getElementById('resultOverlay');
-  const emoji=document.getElementById('resultEmoji');
-  const title=document.getElementById('resultTitle');
-  const reward=document.getElementById('resultReward');
-  if(won){
-    state.coins+=battle.reward;state.wins+=1;save();
-    emoji.textContent='🏆';
-    title.textContent='ПОБЕДА!';
-    title.style.background='var(--gradient-success)';
-    title.style.webkitBackgroundClip='text';
-    title.style.webkitTextFillColor='transparent';
-    reward.textContent='+'+battle.reward+' 🪙 монет';
-    addBpXp(25);
-  } else {
-    emoji.textContent='💀';
-    title.textContent='ПОРАЖЕНИЕ';
-    title.style.background='var(--gradient-danger)';
-    title.style.webkitBackgroundClip='text';
-    title.style.webkitTextFillColor='transparent';
-    reward.textContent='Прокачайся в Лаборатории и попробуй снова';
-  }
-  overlay.style.opacity='1';
-  overlay.style.pointerEvents='auto';
-}
-
-document.getElementById('resultContinue').addEventListener('click',()=>{
-  document.getElementById('resultOverlay').style.opacity='0';
-  document.getElementById('resultOverlay').style.pointerEvents='none';
-  goTo('arena');
-});
-
-// ═══ WALLET + GIFT CODES ═══
-
-function renderWallet(){
-  document.getElementById('walletBalance').textContent=state.rubles;
-  const hist=document.getElementById('txHistory');
-  if(!state.txHistory.length){
-    hist.innerHTML='<span style="font-size:12px;color:var(--text-tertiary)">Пока нет операций</span>';
-    return;
-  }
-  hist.innerHTML=state.txHistory.slice(-8).reverse().map(tx=>`
-    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border-subtle);font-size:12px">
-      <span style="color:var(--text-secondary)">${tx.desc}</span>
-      <span style="font-weight:700;color:${tx.amt>0?'var(--accent-green)':'var(--accent-pink)'}">${tx.amt>0?'+':''}${tx.amt} ₽</span>
-    </div>
-  `).join('');
-}
-
-function addTx(desc,amt){
-  state.txHistory.push({desc,amt,date:new Date().toLocaleDateString('ru')});
-  save();
-}
-
-// Deposit modal
-document.getElementById('depositBtn').addEventListener('click',()=>{
-  const modal=document.getElementById('depositModal');
-  modal.style.opacity='1';modal.style.pointerEvents='auto';
-});
-document.getElementById('depCloseBtn').addEventListener('click',()=>{
-  const modal=document.getElementById('depositModal');
-  modal.style.opacity='0';modal.style.pointerEvents='none';
-});
-document.querySelectorAll('.dep-amt').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    const amt=parseInt(btn.dataset.amt);
-    // В реальном проекте здесь вызов платёжного шлюза (ЮKassa/Stripe)
-    // Сейчас симулируем успешное пополнение
-    state.rubles+=amt;
-    addTx('Пополнение баланса',amt);
-    save();
-    const modal=document.getElementById('depositModal');
-    modal.style.opacity='0';modal.style.pointerEvents='none';
-    toast('Баланс пополнен на '+amt+' ₽ 💳','var(--accent-green)');
-    renderWallet();
-    renderMenu();
-  });
-});
-
-document.getElementById('withdrawBtn').addEventListener('click',()=>{
-  if(state.rubles<100){toast('Минимальный вывод — 100 ₽','var(--accent-pink)');return;}
-  // В реальном проекте — запрос на вывод через бэкенд
-  toast('Запрос на вывод отправлен ✅','var(--accent-cyan)');
-});
-
-// ─── GIFT CODES ───
-// Таблица вероятностей: 5%→2000₽, 10%→1000₽, 15%→500₽, 20%→200₽, 30%→100₽, 20%→0₽
-const CODE_PRIZES=[
-  {chance:5,  amount:2000},
-  {chance:10, amount:1000},
-  {chance:15, amount:500},
-  {chance:20, amount:200},
-  {chance:30, amount:100},
-  {chance:20, amount:0},
-];
-
-function rollCodePrize(){
-  const r=Math.random()*100;
-  let acc=0;
-  for(const p of CODE_PRIZES){
-    acc+=p.chance;
-    if(r<acc)return p.amount;
-  }
-  return 0;
-}
-
-function validateCode(code){
-  // Формат: 8 символов, буквы A-Z и цифры 0-9
-  return /^[A-Z0-9]{8}$/.test(code.trim().toUpperCase());
-}
-
-document.getElementById('redeemBtn').addEventListener('click',()=>{
-  const raw=document.getElementById('codeInput').value.trim().toUpperCase();
-  if(!validateCode(raw)){
-    toast('Неверный формат кода (пример: 76HSG7EW)','var(--accent-pink)');
-    return;
-  }
-  if(state.usedCodes.includes(raw)){
-    toast('Этот код уже был использован ❌','var(--accent-pink)');
-    return;
-  }
-  state.usedCodes.push(raw);
-  const prize=rollCodePrize();
-  if(prize>0){
-    state.rubles+=prize;
-    addTx('Промо-код '+raw,prize);
-    save();
-    toast('🎉 Код активирован! +'+prize+' ₽ на баланс!','var(--accent-green)');
-  } else {
-    save();
-    toast('Код активирован, но приз не выпал 😔 Попробуй ещё!','var(--accent-orange)');
-  }
-  document.getElementById('codeInput').value='';
-  renderWallet();
-  renderMenu();
-});
-
-// ─── WALLET BUTTON IN MENU ───
-// Добавляем кнопку кошелька в меню (вставляем в topbar)
-(function addWalletBtn(){
-  const topbarRight=document.querySelector('.topbar-right');
-  if(topbarRight){
-    const btn=document.createElement('button');
-    btn.className='btn-icon';
-    btn.textContent='💰';
-    btn.title='Кошелёк';
-    btn.addEventListener('click',()=>goTo('wallet'));
-    topbarRight.appendChild(btn);
-  }
-})();// ═══ BATTLE PASS ═══
-
-function addBpXp(amount){
-  state.bp.xp+=amount;
-  const xpNeeded=100;
-  while(state.bp.xp>=xpNeeded){
-    state.bp.xp-=xpNeeded;
-    state.bp.level+=1;
-    toast('🎫 Боевой пропуск: уровень '+state.bp.level+'!','var(--accent-purple)');
-  }
-  save();
-}
-
-function renderBattlePass(){
-  document.getElementById('bpLevel').textContent=state.bp.level;
-  const xpNeeded=100;
-  document.getElementById('bpXpText').textContent=state.bp.xp+' / '+xpNeeded;
-  document.getElementById('bpXpFill').style.width=(state.bp.xp/xpNeeded*100)+'%';
-
-  const container=document.getElementById('bpRewards');
-  container.innerHTML='';
-
-  BP_REWARDS.forEach(row=>{
-    const unlocked=state.bp.level>=row.lvl;
-    const claimedFree=state.bp.claimed.includes('free_'+row.lvl);
-    const claimedPrem=state.bp.claimed.includes('prem_'+row.lvl);
-
-    const div=document.createElement('div');
-    div.style.cssText=`background:var(--gradient-card);border:1px solid ${unlocked?'var(--border-glow)':'var(--border-card)'};border-radius:var(--radius-lg);padding:14px;display:flex;align-items:center;gap:10px;opacity:${unlocked?'1':'.45'}`;
-    div.innerHTML=`
-      <div style="width:32px;height:32px;border-radius:50%;background:var(--accent-purple-glow);color:var(--accent-purple);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;flex-shrink:0">${row.lvl}</div>
-      <div style="flex:1;display:flex;flex-direction:column;gap:6px">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:11px;color:var(--text-tertiary);font-weight:700">БЕСПЛАТНО</span>
-          <span style="font-size:13px;font-weight:700">${row.free}</span>
-          ${unlocked&&!claimedFree?`<button class="claim-btn" data-type="free" data-lvl="${row.lvl}" style="margin-left:auto;border:none;border-radius:8px;padding:4px 12px;font-size:11px;font-weight:800;background:var(--gradient-accent);color:#fff;cursor:pointer">Забрать</button>`:''}
-          ${claimedFree?'<span style="margin-left:auto;font-size:11px;color:var(--accent-green)">✅</span>':''}
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;padding:8px;border-radius:var(--radius-sm);background:${state.bp.premium?'rgba(124,92,252,.08)':'rgba(255,255,255,.03)'}">
-          <span style="font-size:11px;color:var(--accent-gold);font-weight:700">👑 ПРЕМИУМ</span>
-          <span style="font-size:13px;font-weight:700;${!state.bp.premium?'filter:blur(4px)':''}">${row.premium}</span>
-          ${state.bp.premium&&unlocked&&!claimedPrem?`<button class="claim-btn" data-type="prem" data-lvl="${row.lvl}" style="margin-left:auto;border:none;border-radius:8px;padding:4px 12px;font-size:11px;font-weight:800;background:linear-gradient(135deg,var(--accent-gold),var(--accent-orange));color:#08061a;cursor:pointer">Забрать</button>`:''}
-          ${state.bp.premium&&claimedPrem?'<span style="margin-left:auto;font-size:11px;color:var(--accent-green)">✅</span>':''}
-          ${!state.bp.premium?'<span style="margin-left:auto;font-size:11px;color:var(--text-tertiary)">🔒 Премиум</span>':''}
-        </div>
-      </div>
-    `;
-    container.appendChild(div);
-  });
-
-  // claim handlers
-  container.querySelectorAll('.claim-btn').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      const type=btn.dataset.type;
-      const lvl=parseInt(btn.dataset.lvl);
-      const key=type+'_'+lvl;
-      if(state.bp.claimed.includes(key))return;
-      state.bp.claimed.push(key);
-
-      const row=BP_REWARDS.find(r=>r.lvl===lvl);
-      const rewardText=type==='free'?row.free:row.premium;
-
-      // parse reward
-      if(rewardText.includes('монет')){
-        const match=rewardText.match(/\d+/);
-        if(match){state.coins+=parseInt(match[0]);toast('🪙 +'+match[0]+' монет получено!','var(--accent-gold)');}
-      } else if(rewardText.includes('монстр')){
-        // unlock monster from BP
-        const monMap={'Никтус':'bat','Арахнум':'spid','Драккон':'drag','Люминара':'unic'};
-        for(const [name,id] of Object.entries(monMap)){
-          if(rewardText.includes(name)&&!state.owned.includes(id)){
-            state.owned.push(id);
-            toast('🎉 '+name+' добавлен в коллекцию!','var(--accent-purple)');
-          }
-        }
-      } else {
-        toast('🎁 Награда получена: '+rewardText,'var(--accent-cyan)');
-      }
-
-      save();
-      renderBattlePass();
-    });
-  });
-
-  // buy premium btn
-  const bpBuyBtn=document.getElementById('bpBuyBtn');
-  if(state.bp.premium){
-    bpBuyBtn.textContent='👑 Премиум пропуск активен';
-    bpBuyBtn.disabled=true;
-    bpBuyBtn.style.opacity='.5';
-  } else {
-    bpBuyBtn.onclick=()=>{
-      if(state.rubles<199){
-        toast('Нужно 199 ₽ на балансе. Пополни кошелёк 💳','var(--accent-pink)');
-        return;
-      }
-      state.rubles-=199;
-      state.bp.premium=true;
-      addTx('Боевой пропуск (Премиум)',-199);
-      save();
-      toast('👑 Премиум пропуск активирован!','var(--accent-gold)');
-      renderBattlePass();
-      renderMenu();
-    };
-  }
-}// ═══ ФИНАЛЬНАЯ ИНИЦИАЛИЗАЦИЯ ═══
-
-// Telegram main button
-if(tg){
-  tg.MainButton.setText('Закрыть MONXTRIX');
-  tg.MainButton.show();
-  tg.MainButton.onClick(()=>tg.close());
-  tg.BackButton.onClick(()=>{
-    const active=document.querySelector('.screen.active');
-    if(active&&active.id!=='menu'&&active.id!=='splash'){
-      goTo('menu');
-    }
-  });
-}
-
-// Добавляем кнопку кошелька в меню-карточки
-(function addWalletCard(){
-  const grid=document.querySelector('.menu-grid');
-  if(!grid)return;
-  // проверяем что карточки кошелька ещё нет
-  if(grid.querySelector('[data-go="wallet"]'))return;
-  const card=document.createElement('div');
-  card.className='menu-card mc-accent-purple';
-  card.dataset.go='wallet';
-  card.innerHTML=`
-    <div class="mc-bg-icon">💰</div>
-    <div class="mc-icon-wrap">💰</div>
-    <div class="mc-title">Кошелёк</div>
-    <div class="mc-desc">Пополнение, вывод и промо-коды</div>
-  `;
-  grid.appendChild(card);
-})();
-
-// Стили для move-кнопок disabled
-(function addDisabledStyle(){
-  const st=document.createElement('style');
-  st.textContent=`
-    #moveGrid button:disabled{opacity:.3;pointer-events:none}
-    .result-overlay{transition:opacity .3s ease}
-    #arenaStage .fighter{will-change:transform}
-    .screen{will-change:opacity,transform}
-    input:focus{border-color:var(--accent-purple)!important;box-shadow:0 0 0 2px var(--accent-purple-glow)}
-    .dep-amt:active{transform:scale(.94)}
-    #depositModal button.btn-primary{min-width:90px}
-  `;
-  document.head.appendChild(st);
-})();
-
-// Анимация появления карточек меню при входе
-(function animateMenuCards(){
-  const observer=new MutationObserver(()=>{
-    const menu=document.getElementById('menu');
-    if(menu.classList.contains('active')){
-      const cards=menu.querySelectorAll('.menu-card');
-      cards.forEach((c,i)=>{
-        c.style.opacity='0';
-        c.style.transform='translateY(16px)';
-        setTimeout(()=>{
-          c.style.transition='opacity .3s ease, transform .3s ease';
-          c.style.opacity='1';
-          c.style.transform='translateY(0)';
-        },i*60);
-      });
-    }
-  });
-  observer.observe(document.getElementById('menu'),{attributeFilter:['class']});
-})();
-
-// Пульсация badge на кнопке батл-пасса
-(function bpBadgePulse(){
-  const st=document.createElement('style');
-  st.textContent=`
-    @keyframes badgePulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.7}}
-    #bpIconBtn .badge-dot{animation:badgePulse 1.6s ease-in-out infinite}
-  `;
-  document.head.appendChild(st);
-})();
-
-// Свечение арены во время боя
-(function arenaGlow(){
-  const st=document.createElement('style');
-  st.textContent=`
-    @keyframes arenaGlowPulse{
-      0%,100%{box-shadow:0 0 20px rgba(124,92,252,.1),inset 0 0 40px rgba(124,92,252,.03)}
-      50%{box-shadow:0 0 40px rgba(124,92,252,.2),inset 0 0 60px rgba(124,92,252,.06)}
-    }
-    #arenaStage{animation:arenaGlowPulse 3s ease-in-out infinite}
-  `;
-  document.head.appendChild(st);
-})();
-
-// Hover эффекты для карточек меню
-(function menuCardHover(){
-  document.addEventListener('touchstart',e=>{
-    const card=e.target.closest('.menu-card');
-    if(card){
-      card.style.transform='scale(.97)';
-      card.style.borderColor='var(--border-glow)';
-    }
-  },{passive:true});
-  document.addEventListener('touchend',e=>{
-    const card=e.target.closest('.menu-card');
-    if(card){
-      setTimeout(()=>{
-        card.style.transform='';
-        card.style.borderColor='';
-      },150);
-    }
-  },{passive:true});
-})();
-
-// Защита от случайного закрытия
-window.addEventListener('beforeunload',()=>save());
-
-// Первый запуск — приветствие
-(function firstRun(){
-  if(!localStorage.getItem('monxtrix_v2')){
-    setTimeout(()=>{
-      toast('👋 Добро пожаловать в MONXTRIX!','var(--accent-purple)');
-    },3200);
-  }
-})();
-
-console.log('%cMONXTRIX v2.0 loaded ✅','color:#7c5cfc;font-weight:900;font-size:16px');
-// ═══ ДОПОЛНИТЕЛЬНЫЕ ФИЧИ: ЗВУКИ, КОМБО, ДОСТИЖЕНИЯ, ЕЖЕДНЕВНЫЙ БОНУС ═══
-
-// ─── ЗВУКОВЫЕ ЭФФЕКТЫ (Web Audio API, без файлов) ───
-const SFX=(function(){
-  let ctx=null;
-  function getCtx(){
-    if(!ctx)ctx=new(window.AudioContext||window.webkitAudioContext)();
-    return ctx;
-  }
-  function beep(freq,dur,type='square',vol=.15){
-    try{
-      const c=getCtx();
-      const o=c.createOscillator();
-      const g=c.createGain();
-      o.connect(g);g.connect(c.destination);
-      o.type=type;o.frequency.value=freq;
-      g.gain.setValueAtTime(vol,c.currentTime);
-      g.gain.exponentialRampToValueAtTime(.001,c.currentTime+dur);
-      o.start(c.currentTime);o.stop(c.currentTime+dur);
-    }catch(e){}
-  }
-  return{
-    hit:()=>{beep(180,.12,'sawtooth',.12);},
-    crit:()=>{beep(320,.08,'square',.18);setTimeout(()=>beep(480,.12,'square',.14),80);},
-    heal:()=>{beep(440,.15,'sine',.12);setTimeout(()=>beep(550,.2,'sine',.1),120);},
-    win:()=>{[523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,.18,'sine',.15),i*120));},
-    lose:()=>{[300,250,200].forEach((f,i)=>setTimeout(()=>beep(f,.2,'sawtooth',.12),i*150));},
-    buy:()=>{beep(660,.1,'sine',.12);setTimeout(()=>beep(880,.15,'sine',.1),100);},
-    levelup:()=>{[400,500,600,800].forEach((f,i)=>setTimeout(()=>beep(f,.15,'sine',.15),i*100));},
-    code:()=>{beep(700,.08,'sine',.15);setTimeout(()=>beep(900,.12,'sine',.12),90);},
-  };
-})();
-
-// Патчим playerMove чтобы играл звук
-const _origPlayerMove=playerMove;
-window.playerMove=function(i){
-  const mv=MOVES[i];
-  if(mv.heal)SFX.heal();
-  else if(i===3)SFX.crit();
-  else SFX.hit();
-  _origPlayerMove(i);
-};
-
-// Патчим endBattle для звука
-const _origEndBattle=endBattle;
-window.endBattle=function(won){
-  if(won)SFX.win(); else SFX.lose();
-  _origEndBattle(won);
-};
-
-// ─── КОМБО-СИСТЕМА ───
-let comboCount=0;
-let comboTimer=null;
-
-function triggerCombo(){
-  comboCount++;
-  clearTimeout(comboTimer);
-  comboTimer=setTimeout(()=>{comboCount=0;},3500);
-
-  if(comboCount>=3){
-    const stage=document.getElementById('arenaStage');
-    const el=document.createElement('div');
-    el.textContent='🔥 КОМБО x'+comboCount+'!';
-    el.style.cssText=`
-      position:absolute;top:30%;left:50%;transform:translateX(-50%) scale(.5);
-      font-size:20px;font-weight:900;color:var(--accent-orange);
-      text-shadow:0 0 20px var(--accent-orange);z-index:20;pointer-events:none;
-      font-family:'Orbitron',monospace;
-      animation:comboAnim .6s ease-out forwards;
-    `;
-    if(!document.getElementById('comboStyle')){
-      const st=document.createElement('style');
-      st.id='comboStyle';
-      st.textContent='@keyframes comboAnim{0%{transform:translateX(-50%) scale(.5);opacity:0}40%{transform:translateX(-50%) scale(1.2);opacity:1}100%{transform:translateX(-50%) scale(1) translateY(-20px);opacity:0}}';
-      document.head.appendChild(st);
-    }
-    stage.appendChild(el);
-    setTimeout(()=>el.remove(),650);
-    SFX.crit();
-  }
-}
-
-// ─── ДОСТИЖЕНИЯ ───
-const ACHIEVEMENTS=[
-  {id:'first_win',   icon:'🏆',title:'Первая победа',   desc:'Выиграй первый бой',          check:()=>state.wins>=1},
-  {id:'wins_5',      icon:'⚔️', title:'Боец',            desc:'Выиграй 5 боёв',              check:()=>state.wins>=5},
-  {id:'wins_20',     icon:'🗡️', title:'Ветеран арены',   desc:'Выиграй 20 боёв',             check:()=>state.wins>=20},
-  {id:'rich',        icon:'💰', title:'Богач',           desc:'Накопи 500 монет',            check:()=>state.coins>=500},
-  {id:'collector',   icon:'📒', title:'Коллекционер',    desc:'Открой 5 монстров',           check:()=>state.owned.length>=5},
-  {id:'max_level',   icon:'🧬', title:'Учёный',          desc:'Прокачай монстра до уровня 5',check:()=>Object.values(state.levels).some(l=>l>=5)},
-  {id:'bp_premium',  icon:'👑', title:'Премиум игрок',   desc:'Купи боевой пропуск',         check:()=>state.bp.premium},
-  {id:'code_used',   icon:'🎁', title:'Удачливый',       desc:'Активируй промо-код',         check:()=>state.usedCodes.length>=1},
-];
-
-if(!state.achievements)state.achievements=[];
-
-function checkAchievements(){
-  let newUnlocked=false;
-  ACHIEVEMENTS.forEach(a=>{
-    if(!state.achievements.includes(a.id)&&a.check()){
-      state.achievements.push(a.id);
-      newUnlocked=true;
-      showAchievementPopup(a);
-    }
-  });
-  if(newUnlocked)save();
-}
-
-function showAchievementPopup(a){
-  const el=document.createElement('div');
-  el.style.cssText=`
-    position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);
-    z-index:300;background:var(--bg-card);border:1px solid var(--border-glow);
-    border-radius:var(--radius-lg);padding:12px 20px;
-    display:flex;align-items:center;gap:10px;
-    box-shadow:0 8px 32px rgba(124,92,252,.3);
-    transition:transform .4s cubic-bezier(.34,1.56,.64,1);
-    backdrop-filter:blur(20px);min-width:240px;
-  `;
-  el.innerHTML=`
-    <div style="font-size:28px">${a.icon}</div>
-    <div>
-      <div style="font-size:10px;color:var(--accent-purple);font-weight:800;letter-spacing:1px">ДОСТИЖЕНИЕ</div>
-      <div style="font-weight:800;font-size:14px">${a.title}</div>
-      <div style="font-size:11px;color:var(--text-tertiary)">${a.desc}</div>
-    </div>
-  `;
-  document.body.appendChild(el);
-  setTimeout(()=>el.style.transform='translateX(-50%) translateY(0)',50);
-  setTimeout(()=>{
-    el.style.transform='translateX(-50%) translateY(-80px)';
-    setTimeout(()=>el.remove(),450);
-  },3000);
-  SFX.levelup();
-}
-
-// Вешаем проверку достижений на ключевые события
-const _origSave=save;
-window.save=function(){
-  _origSave();
-  checkAchievements();
-};
-
-// ─── ЕЖЕДНЕВНЫЙ БОНУС ───
-(function dailyBonus(){
-  const today=new Date().toDateString();
-  if(!state.lastBonus)state.lastBonus='';
-  if(state.lastBonus===today)return;
-
-  // показываем через 1.5с после входа в меню
-  const observer=new MutationObserver(()=>{
-    const menu=document.getElementById('menu');
-    if(menu.classList.contains('active')&&state.lastBonus!==today){
-      setTimeout(()=>{
-        state.lastBonus=today;
-        const bonus=50+Math.floor(state.wins/5)*10;
-        state.coins+=bonus;
-        save();
-
-        const el=document.createElement('div');
-        el.style.cssText=`
-          position:fixed;inset:0;z-index:250;
-          background:rgba(8,6,26,.85);backdrop-filter:blur(30px);
-          display:flex;flex-direction:column;align-items:center;justify-content:center;
-          gap:12px;text-align:center;padding:20px;
-        `;
-        el.innerHTML=`
-          <div style="font-size:56px;animation:bounce 1s ease-in-out infinite">🎁</div>
-          <div style="font-family:'Orbitron',monospace;font-size:20px;font-weight:900;background:var(--gradient-accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent">ЕЖЕДНЕВНЫЙ БОНУС</div>
-          <div style="font-size:14px;color:var(--text-secondary)">Ты заходишь каждый день — держи награду!</div>
-          <div style="font-size:32px;font-weight:900;color:var(--accent-gold)">+${bonus} 🪙</div>
-          <button style="margin-top:8px;border:none;border-radius:var(--radius-md);padding:14px 32px;font-weight:800;font-size:15px;background:var(--gradient-accent);color:#fff;cursor:pointer" id="dailyCloseBtn">Забрать!</button>
-        `;
-        document.body.appendChild(el);
-        if(!document.getElementById('bounceStyle')){
-          const st=document.createElement('style');
-          st.id='bounceStyle';
-          st.textContent='@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}';
-          document.head.appendChild(st);
-        }
-        SFX.win();
-        document.getElementById('dailyCloseBtn').addEventListener('click',()=>{
-          el.style.opacity='0';
-          el.style.transition='opacity .3s ease';
-          setTimeout(()=>el.remove(),320);
-          toast('+'+bonus+' монет — ежедневный бонус! 🎁','var(--accent-gold)');
-          renderMenu();
+export class AssetLoader {
+    /**
+     * Загрузить набор ресурсов и вернуть Promise, который resolves когда всё готово
+     * @param {Object} assetsMap  { имя: путь }
+     * @returns {Promise<PIXI.LoaderResource[]>}
+     */
+    static load(assetsMap) {
+        return new Promise((resolve, reject) => {
+            const loader = PIXI.Loader.shared;
+            // Добавляем все ресурсы
+            for (const [name, path] of Object.entries(assetsMap)) {
+                loader.add(name, path);
+            }
+            loader.load((loaderObj, resources) => {
+                // Проверяем на ошибки
+                const errors = Object.values(resources).filter(r => r.error);
+                if (errors.length) {
+                    reject(errors.map(e => e.error.message));
+                } else {
+                    resolve(Object.values(resources));
+                }
+            });
         });
-      },1500);
-      observer.disconnect();
     }
-  });
-  observer.observe(document.getElementById('menu'),{attributeFilter:['class']});
-})();
-
-// ─── ЭКРАН ДОСТИЖЕНИЙ (добавляем в меню) ───
-(function addAchievementsCard(){
-  const grid=document.querySelector('.menu-grid');
-  if(!grid||grid.querySelector('[data-go="achievements"]'))return;
-  const card=document.createElement('div');
-  card.className='menu-card mc-accent-orange';
-  card.dataset.go='achievements';
-  card.innerHTML=`
-    <div class="mc-bg-icon">🏆</div>
-    <div class="mc-icon-wrap">🏆</div>
-    <div class="mc-title">Достижения</div>
-    <div class="mc-desc">Твои трофеи и прогресс</div>
-  `;
-  grid.appendChild(card);
-})();
-
-// Экран достижений (добавляем в HTML динамически)
-(function createAchievementsScreen(){
-  if(document.getElementById('achievements'))return;
-  const screen=document.createElement('div');
-  screen.className='screen';
-  screen.id='achievements';
-  screen.innerHTML=`
-    <div class="back-row"><button class="btn-back" data-go="menu">← Назад</button><div class="screen-title">🏆 Достижения</div></div>
-    <div id="achievementsList" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-bottom:8px"></div>
-  `;
-  document.getElementById('app').appendChild(screen);
-  screens['achievements']=screen;
-})();
-
-// Рендер достижений
-const _origGoTo=goTo;
-window.goTo=function(id){
-  _origGoTo(id);
-  if(id==='achievements')renderAchievements();
-};
-
-function renderAchievements(){
-  const list=document.getElementById('achievementsList');
-  if(!list)return;
-  list.innerHTML='';
-  ACHIEVEMENTS.forEach(a=>{
-    const unlocked=state.achievements.includes(a.id);
-    const div=document.createElement('div');
-    div.style.cssText=`display:flex;align-items:center;gap:12px;background:var(--gradient-card);border:1px solid ${unlocked?'var(--border-glow)':'var(--border-card)'};border-radius:var(--radius-lg);padding:14px;opacity:${unlocked?'1':'.45'}`;
-    div.innerHTML=`
-      <div style="font-size:32px;width:44px;text-align:center">${unlocked?a.icon:'🔒'}</div>
-      <div style="flex:1">
-        <div style="font-weight:800;font-size:14px">${a.title}</div>
-        <div style="font-size:12px;color:var(--text-tertiary);margin-top:2px">${a.desc}</div>
-      </div>
-      ${unlocked?'<div style="font-size:18px">✅</div>':''}
-    `;
-    list.appendChild(div);
-  });
 }
 
-// ─── КОМБО в playerMove ───
-const _origPlayerMoveWithSfx=window.playerMove;
-window.playerMove=function(i){
-  const mv=MOVES[i];
-  if(!mv.heal)triggerCombo();
-  _origPlayerMoveWithSfx(i);
+6. src/engine/input.js
+
+// Простая система ввода (клавиши WASD + мышь) – можно заменить на более avançленную
+export const Keys = {
+    w: false,
+    a: false,
+    s: false,
+    d: false,
+    Space: false,
+    Shift: false
 };
 
-console.log('%cMONXTRIX v2.0 — ALL SYSTEMS GO 🚀','color:#39ff7a;font-weight:900;font-size:14px');
-</script>
+window.addEventListener('keydown', e => {
+    const key = e.key.toLowerCase();
+    if (key in Keys) Keys[key] = true;
+    if (e.key === ' ') Keys.Space = true;
+    if (e.key === 'Shift') Keys.Shift = true;
+});
+window.addEventListener('keyup', e => {
+    const key = e.key.toLowerCase();
+    if (key in Keys) Keys[key] = false;
+    if (e.key === ' ') Keys.Space = false;
+    if (e.key === 'Shift') Keys.Shift = false;
+});
+
+// Мышь – отслеживаем позицию в мировых координатах (будет использовано в engine.js)
+export const Mouse = { x: 0, y: 0, down: false };
+window.addEventListener('pointermove', e => {
+    // Позиция будет пересчитываться в engine.js после full resize
+});
+window.addEventListener('pointerdown', e => { Mouse.down = true; });
+window.addEventListener('pointerup', e => { Mouse.down = false; });
+
+7. src/engine/engine.js
+
+// Основной игровой движок: инициализация Pixi, game loop, управление сценами
+import * as PIXI from 'pixi.js';
+import { AssetLoader } from '../utils/loader.js';
+import { GameStorage } from '../utils/storage.js';
+import { Keys, Mouse } from './input.js';
+import { Tilemap } from '../map/tilemap.js';
+import { Hero } from '../entities/hero.js';
+import { Building } from '../entities/building.js';
+import { Troop } from '../entities/troop.js';
+import { HUD } from '../ui/hud.js';
+import { Menu } from '../ui/menu.js';
+import { BattlePass } from '../ui/battlePass.js';
+import { Shop } from '../ui/shop.js';
+
+export class Engine {
+    constructor(containerId) {
+        // ---------- PIXI Application ----------
+        this.app = new PIXI.Application({
+            width: window.innerWidth,
+            height: window.innerHeight,
+            backgroundColor: 0x1099bb,
+            resizeTo: window,
+            antialias: true
+        });
+        const container = document.getElementById(containerId);
+        container.appendChild(this.app.view);
+
+        // ---------- Слои сцены ----------
+        this.background = new PIXI.Container(); // тайлы, декорации
+        this.game = new PIXI.Container();       // игровые объекты (герой, здания, войска)
+        this.ui = new PIXI.Container();         // UI‑элементы, которые не в DOM (можно смешивать)
+        this.app.stage.addChild(this.background, this.game, this.ui);
+
+        // ---------- Подсистемы ----------
+        this.tilemap = new Tilemap(this.background);
+        this.hero = new Hero(this.game);
+        this.buildings = [];
+        this.troops = [];
+        this.hud = new HUD(this.ui);
+        this.menu = new Menu(this.ui);
+        this.battlePass = new BattlePass(this.ui);
+        this.shop = new Shop(this.ui);
+
+        // ---------- Состояние игры ----------
+        this.state = GameStorage.load();
+        this.applySavedState();
+
+        // ---------- Ввод ----------
+        this.app.ticker.add(delta => this.update(delta));
+        window.addEventListener('resize', () => this.onResize());
+        this.app.view.addEventListener('pointerdown', e => this.onPointerDown(e));
+        this.app.view.addEventListener('pointerup', e => this.onPointerUp(e));
+        this.app.view.addEventListener('pointermove', e => this.onPointerMove(e));
+
+        // ---------- Загрузка ресурсов ----------
+        this.loadAssets().then(() => {
+            console.log('Все ресурсы загружены');
+            this.start();
+        }).catch(err => {
+            console.error('Ошибка загрузки ресурсов:', err);
+        });
+    }
+
+    /** Загружаем placeholder‑изображения и аудио */
+    async loadAssets() {
+        const assets = {
+            // héroe
+            hero_idle: 'assets/img/hero_idle.png',
+            hero_attack: 'assets/img/hero_attack.png',
+            // здания
+            building: 'assets/img/building.png',
+            // войска
+            troop: 'assets/img/troop.png',
+            // тайлы карты
+            grass: 'assets/img/grass.png',
+            water: 'assets/img/water.png',
+            road: 'assets/img/road.png',
+            // звуки (можно добавить позже)
+            click: 'assets/audio/click.wav',
+            bgm: 'assets/audio/bgm.mp3'
+        };
+        await AssetLoader.load(assets);
+        // Сохраняем ссылки на текстуры для удобного доступа
+        this.textures = PIXI.Loader.shared.resources;
+    }
+
+    start() {
+        // Можно запустить музыку и т.п.
+        if (this.textures.bgm) {
+            const bgm = new PIXI.Sound(this.textures.bgm.url);
+            bgm.play({ loop: true, volume: 0.3 });
+        }
+    }
+
+    /** Обновление логики каждую рамку */
+    update(delta) {
+        this.tilemap.update(delta);
+        this.hero.update(delta, Keys, Mouse);
+        this.buildings.forEach(b => b.update(delta));
+        this.troops.forEach(t => t.update(delta, this.hero));
+        this.hud.update(delta, this.state);
+        this.menu.update(delta);
+        this.battlePass.update(delta);
+        this.shop.update(delta);
+        // Сохраняем состояние периодически (например, каждые 5 секунд)
+        this._saveTimer = (this._saveTimer || 0) + delta;
+        if (this._saveTimer > 5) {
+            this._saveTimer = 0;
+            this.saveState();
+        }
+    }
+
+    /** Сохраняем текущее игровое состояние */
+    saveState() {
+        const state = {
+            gold: this.state.gold,
+            elixir: this.state.elixir,
+            heroLevel: this.state.heroLevel,
+            buildings: this.buildings.map(b => b.getSaveData()),
+            troops: this.troops.map(t => t.getSaveData()),
+            battlePassLevel: this.state.battlePassLevel,
+            dailyQuests: this.state.dailyQuests
+        };
+        GameStorage.save(state);
+    }
+
+    /** Восстанавливаем объекты из сохранённого состояния */
+    applySavedState() {
+        this.state.gold = this.state.gold ?? 1000;
+        this.state.elixir = this.state.elixir ?? 500;
+        this.state.heroLevel = this.state.heroLevel ?? 1;
+        this.state.battlePassLevel = this.state.battlePassLevel ?? 0;
+        this.state.dailyQuests = this.state.dailyQuests ?? [];
+
+        // Восстанавливаем здания
+        this.buildings = (this.state.buildings || []).map(data => {
+            const b = new Building(this.game, data.x, data.y, data.type);
+            b.level = data.level;
+            b.updateVisual();
+            return b;
+        });
+
+        // Восстанавливаем wojska
+        this.troops = (this.state.troops || []).map(data => {
+            const t = new Troop(this.game, data.x, data.y, data.type, data.targetX, data.targetY);
+            t.level = data.level;
+            t.health = data.health;
+            t.updateVisual();
+            return t;
+        });
+    }
+
+    // ---------- Обработчики ввода ----------
+    onResize() {
+        this.app.renderer.resize(window.innerWidth, window.innerHeight);
+    }
+
+    onPointerDown(event) {
+        const pos = this.app.renderer.plugins.interaction.mouse.global;
+        Mouse.x = pos.x;
+        Mouse.y = pos.y;
+        // Если включён режим строительства – создаём здание
+        if (this.menu.isBuildingMode()) {
+            const buildingType = this.menu.getSelectedBuildingType() || 'basic';
+            const building = new Building(this.game, pos.x, pos.y, buildingType);
+            this.buildings.push(building);
+            this.menu.exitBuildingMode();
+        }
+    }
+
+    onPointerUp() {
+        Mouse.down = false;
+    }
+
+    onPointerMove(event) {
+        const pos = this.app.renderer.plugins.interaction.mouse.global;
+        Mouse.x = pos.x;
+        Mouse.y = pos.y;
+    }
+}
+
+8. src/entities/hero.js
+
+// Класс героя – основной управляемый персонаж
+import * as PIXI from 'pixi.js';
+import { randInt } from '../utils/utils.js';
+
+export class Hero {
+    /**
+     * @param {PIXI.Container} container контейнер, в котором будет размещён спрайт
+     */
+    constructor(container) {
+        this.container = new PIXI.Container();
+        container.addChild(this.container);
+        // Спрайт (заглушка – заменить на реальный атлас позже)
+        this.sprite = new PIXI.Sprite(PIXI.Loader.shared.resources.hero_idle.texture);
+        this.sprite.anchor.set(0.5);
+        this.sprite.scale.set(0.6);
+        this.container.addChild(this.sprite);
+        // Анимация атаки (можно добавить позже)
+        this.attackSprite = new PIXI.Sprite(PIXI.Loader.shared.resources.hero_attack.texture);
+        this.attackSprite.anchor.set(0.5);
+        this.attackSprite.scale.set(0.6);
+        this.attackSprite.visible = false;
+        this.container.addChild(this.attackSprite);
+
+        // Позиция и movement
+        this.position = { x: 400, y: 300 }; // начальное место в центре экрана
+        this.velocity = { x: 0, y: 0 };
+        this.speed = 180; // пикселей за секунду
+        this.container.position.set(this.position.x, this.position.y);
+
+        // Характеристики героя
+        this.level = 1;
+        this.maxHealth = 100 + (this.level - 1) * 20;
+        this.health = this.maxHealth;
+        this.attackDamage = 12 + (this.level - 1) * 2;
+        this.attackSpeed = 1.2; // атаки в секунду
+        this._attackCooldown = 0;
+
+        // Способности (заглушки – будут заполняться из data/heroes.json)
+        this.abilities = [
+            { name: 'Удар меча', cooldown: 4, timer: 0, description: 'Наносит урон по области' },
+            { name: 'Щитовая стена', cooldown: 8, timer: 0, description: 'Временно увеличивает защиту' }
+        ];
+    }
+
+    /**
+     * Обновление логики героя каждый тик
+     * @param {number} delta – время с прошлого кадра (в секундах)
+     * @param {Object} keys – объект с нажатыми клавишами (W/A/S/D и т.д.)
+     * @param {Object} mouse – объект {x, y, down}
+     */
+    update(delta, keys, mouse) {
+        // ---- Перемещение ----
+        let moveX = 0, moveY = 0;
+        if (keys.w) moveY -= 1;
+        if (keys.s) moveY += 1;
+        if (keys.a) moveX -= 1;
+        if (keys.d) moveX += 1;
+        const len = Math.hypot(moveX, moveY);
+        if (len > 0) {
+            const nx = moveX / len;
+            const ny = moveY / len;
+            this.position.x += nx * this.speed * delta;
+            this.position.y += ny * this.speed * delta;
+            this.container.position.set(this.position.x, this.position.y);
+            // Ориентируем спрайт в сторону движения (простой поворот)
+            if (moveX !== 0 || moveY !== 0) {
+                const angle = Math.atan2(moveY, moveX);
+                this.container.rotation = angle;
+            }
+        }
+
+        // ---- Атака (по нажатию пробела) ----
+        if (keys.Space && this._attackCooldown <= 0) {
+            this._attackCooldown = 1 / this.attackSpeed;
+            this._performAttack();
+        }
+        if (this._attackCooldown > 0) this._attackCooldown -= delta;
+
+        // ---- Способности ----
+        this.abilities.forEach(ab => {
+            if (ab.timer > 0) ab.timer -= delta;
+        });
+        // Пример использования первой способности по клавише Shift
+        if (keys.Shift && this.abilities[0].timer <= 0) {
+            this.abilities[0].timer = this.abilities[0].cooldown;
+            this._useAbility(0);
+        }
+    }
+
+    _performAttack() {
+        // В простомDemo просто мигаем спрайтом ataque
+        this.sprite.visible = false;
+        this.attackSprite.visible = true;
+        setTimeout(() => {
+            this.sprite.visible = true;
+            this.attackSprite.visible = false;
+        }, 100);
+        // Здесь можно наносить урон ближайшим врагам/зданиям
+        console.log('Герой атакует, урон:', this.attackDamage);
+    }
+
+    _useAbility(index) {
+        const ability = this.abilities[index];
+        console.log(`Герой использует способность: ${ability.name}`);
+        // Реализация эффекта способности будет добавлена позже
+    }
+
+    /** Получить данные для сохранения */
+    getSaveData() {
+        return {
+            x: this.position.x,
+            y: this.position.y,
+            level: this.level,
+            health: this.health
+        };
+    }
+
+    /** Применить сохранённые данные */
+    loadSaveData(data) {
+        this.position.x = data.x ?? 400;
+        this.position.y = data.y ?? 300;
+        this.level = data.level ?? 1;
+        this.health = data.health ?? this.maxHealth;
+        this.container.position.set(this.position.x, this.position.y);
+    }
+}
+
+9. src/entities/building.js
+
+// Здания – источник ресурсов, можно улучшать
+import * as PIXI from 'pixi.js';
+import { randInt } from '../utils/utils.js';
+
+export class Building {
+    /**
+     * @param {PIXI.Container} container
+     * @param {number} x
+     * @param {number} y
+     * @param {string} тип: 'goldMine', 'elixirCollector', 'storage', ' barracks' и т.д.
+     */
+    constructor(container, x, y, type = 'goldMine') {
+        this.container = new PIXI.Container();
+        container.addChild(this.container);
+        this.type = type;
+        this.level = 1;
+        this.position = { x, y };
+        this.container.position.set(x, y);
+
+        // Выбираем текстуру в зависимости от типа (пока всё одна заглушка)
+        this.sprite = new PIXI.Sprite(PIXI.Loader.shared.resources.building.texture);
+        this.sprite.anchor.set(0.5);
+        this.sprite.scale.set(0.5);
+        this.container.addChild(this.sprite);
+
+        // Параметры 생산/хранения
+        this._updateProductionParams();
+    }
+
+    /** Обновление параметров в зависимости от уровня */
+    _updateProductionParams() {
+        // Базовые показатели для золотой шахты
+        if (this.type === 'goldMine') {
+            this.productionPerSec = 2 + (this.level - 1) * 0.5; // золото/сек
+            this.storageCapacity = 500 + (this.level - 1) * 100;
+        } else if (this.type === 'elixirCollector') {
+            this.productionPerSec = 1.5 + (this.level - 1) * 0.4;
+            this.storageCapacity = 400 + (this.level - 1) * 80;
+        } else if (this.type === 'storage') {
+            this.storageCapacity = 1000 + (this.level - 1) * 200; // общий склад
+            this.productionPerSec = 0;
+        } else {
+            // barracks, например – не производит ресурсы, но может обучать войска
+            this.productionPerSec = 0;
+            this.storageCapacity = 0;
+        }
+        this.stored = 0; // сколько уже накоплено
+    }
+
+    /** Обновление каждый тик */
+    update(delta) {
+        // Накопить ресурсы
+        if (this.productionPerSec > 0) {
+            const gain = this.productionPerSec * delta;
+            this.stored = Math.min(this.stored + gain, this.storageCapacity);
+        }
+        // Визуальный индикатор производительности (например, пульсировать)
+        const pulse = 1 + Math.sin(Date.now() * 0.002) * 0.05;
+        this.sprite.scale.set(0.5 * pulse, 0.5 * pulse);
+    }
+
+    /** Собрать ресурсы (вызывается из HUD/меню) */
+    collect() {
+        const gathered = { gold: 0, elixir: 0 };
+        if (this.type === 'goldMine') gathered.gold = this.stored;
+        if (this.type === 'elixirCollector') gathered.elixir = this.stored;
+        this.stored = 0;
+        return gathered;
+    }
+
+    /** Улучшить здание (увеличить уровень) */
+    upgrade() {
+        this.level += 1;
+        this._updateProductionParams();
+        // Здесь можно менять текстуру, добавлять эффекты и т.д.
+    }
+
+    /** Получить стоимость улучшения (золото/эликсир) */
+    getUpgradeCost() {
+        const baseGold = 100;
+        const baseElixir = 50;
+        return {
+            gold: baseGold * this.level,
+            elixir: baseElixir * this.level
+        };
+    }
+
+    /** Данные для сохранения */
+    getSaveData() {
+        return {
+            x: this.position.x,
+            y: this.position.y,
+            type: this.type,
+            level: this.level,
+            stored: this.stored
+        };
+    }
+
+    /** Восстановить из сохранённого состояния */
+    loadSaveData(data) {
+        this.position.x = data.x;
+        this.position.y = data.y;
+        this.type = data.type;
+        this.level = data.level;
+        this.stored = data.stored ?? 0;
+        this.container.position.set(this.position.x, this.position.y);
+        this._updateProductionParams();
+    }
+}
+
+10. src/entities/troop.js
+
+// Простые юниты, которые могут двигаться к цели и наносить урон
+import * as PIXI from 'pixi.js';
+import { randInt } from '../utils/utils.js';
+
+export class Troop {
+    /**
+     * @param {PIXI.Container} container
+     * @param {number} x
+     * @param {number} y
+     * @param {string} тип: 'barbarian', 'archer', 'giant' и т.д.
+     * @param {number|null} targetX
+     * @param {number|null} targetY
+     */
+    constructor(container, x, y, type = 'barbarian', targetX = null, targetY = null) {
+        this.container = new PIXI.Container();
+        container.addChild(this.container);
+        this.type = type;
+        this.target = { x: targetX, y: targetY };
+        this.position = { x, y };
+        this.container.position.set(x, y);
+
+        this.sprite = new PIXI.Sprite(PIXI.Loader.shared.resources.troop.texture);
+        this.sprite.anchor.set(0.5);
+        this.sprite.scale.set(0.4);
+        this.container.addChild(this.sprite);
+
+        // Параметры юнита в зависимости от типа
+        this._setStatsByType();
+        this._path = []; // будет заполняться алгоритмом поиска пути (пока простая прямая)
+    }
+
+    _setStatsByType() {
+        switch (this.type) {
+            case 'barbarian':
+                this.speed = 80;
+                this.health = 30;
+                this.maxHealth = 30;
+                this.damage = 8;
+                this.range = 30; // ближний бой
+                break;
+            case 'archer':
+                this.speed = 70;
+                this.health = 20;
+                this.maxHealth = 20;
+                this.damage = 12;
+                this.range = 150; // дальний бой
+                break;
+            case 'giant':
+                this.speed = 50;
+                this.health = 120;
+                this.maxHealth = 120;
+                this.damage = 20;
+                this.range = 40;
+                break;
+            default:
+                this.speed = 60;
+                this.health = 25;
+                this.maxHealth = 25;
+                this.damage = 6;
+                this.range = 50;
+        }
+    }
+
+    /** Обновление каждый тик – движение к цели */
+    update(delta, hero) {
+        // Если цель не задана – просто стоять
+        if (!this.target.x || !this.target.y) return;
+        // Вычисляем вектор к цели
+        const dx = this.target.x - this.position.x;
+        const dy = this.target.y - this.position.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist < 5) {
+            // Достигли цели – можно нанести урон зданию или герою
+            this._onReachTarget();
+            return;
+        }
+        const moveX = (dx / dist) * this.speed * delta;
+        const moveY = (dy / dist) * this.speed * delta;
+        this.position.x += moveX;
+        this.position.y += moveY;
+        this.container.position.set(this.position.x, this.position.y);
+        // Ориентируем спрайт в сторону движения
+        if (dx !== 0 || dy !== 0) {
+            const angle = Math.atan2(dy, dx);
+            this.container.rotation = angle;
+        }
+    }
+
+    _onReachTarget() {
+        // Простая логика: если цель – герой, наносим урон; если здание – пытаемся разрушить
+        // Для демо просто пишем в консоль и удаляем troop
+        console.log(`Юнит ${this.type} достиг цели (${this.target.x},${this.target.y})`);
+        // В реальной игре здесь будет логика боя
+        // Удаляем юнит из массива troops (см. engine.js – будем фильтровать мертвых)
+        this.container.visible = false;
+        this._markForRemoval = true;
+    }
+
+    /** Установить новую цель (например, клик мыши) */
+    setTarget(x, y) {
+        this.target = { x, y };
+        // Можно вызвать pathfinding здесь
+    }
+
+    /** Данные для сохранения */
+    getSaveData() {
+        return {
+            x: this.position.x,
+            y: this.position.y,
+            type: this.type,
+            level: 1, // пока уровень не реализован
+            health: this.health,
+            targetX: this.target.x,
+            targetY: this.target.y
+        };
+    }
+
+    /** Восстановить из сохранённого состояния */
+    loadSaveData(data) {
+        this.position.x = data.x;
+        this.position.y = data.y;
+        this.type = data.type;
+        this.health = data.health ?? this.maxHealth;
+        this.target = {
+            x: data.targetX !== undefined ? data.targetX : null,
+            y: data.targetY !== undefined ? data.targetY : null
+        };
+        this.container.position.set(this.position.x, this.position.y);
+        this._setStatsByType();
+    }
+}
+
+11. src/map/tilemap.js
+
+// Простая тайловая карта (grass, water, road). Можно расширить до процедурной генерации.
+import * as PIXI from 'pixi.js';
+
+export class Tilemap {
+    /**
+     * @param {PIXI.Container} container куда будут добавлены тайлы
+     */
+    constructor(container) {
+        this.container = new PIXI.Container();
+        container.addChild(this.container);
+        this.tileSize = 64;
+        this.mapWidth = 25;   // количество тайлов по X
+        this.mapHeight = 18;  // количество тайлов по Y
+        this.tiles = [];      // 2D массив с типами тайлов
+        this.generate();
+    }
+
+    /** Заполняем карту случайным набором grass/water/road */
+    generate() {
+        const grassTexure
+        const grassTex = PIXI.Loader.shared.resources.grass.texture;
+        const waterTex = PIXI.Loader.shared.resources.water.texture;
+        const roadTex = PIXI.Loader.shared.resources.road.texture;
+        for (let y = 0; y < this.mapHeight; y++) {
+            this.tiles[y] = [];
+            for (let x = 0; x < this.mapWidth; x++) {
+                // Небольшая шумовая функция для создания озёр и дорог
+                const noise = Math.random();
+                let tex;
+                if (noise < 0.1) tex = waterTex; // 10% вода
+                else if (noise < 0.25) tex = roadTex; // 15% дорога
+                else tex = grassTex; // остальное трава
+
+                const tile = new PIXI.Sprite(tex);
+                tile.x = x * this.tileSize;
+                tile.y = y * this.tileSize;
+                this.container.addChild(tile);
+                this.tiles[y].push({ type: tex === grassTex ? 'grass' : tex === waterTex ? 'water' : 'road' });
+            }
+        }
+    }
+
+    /** Обновление (можно добавить анимацию воды) */
+    update(delta) {
+        // Пример анимации воды – меняем альфа синусоидально
+        for (let y = 0; y < this.mapHeight; y++) {
+            for (let x = 0; x < this.mapWidth; x++) {
+                const tile = this.container.children[y * this.mapWidth + x];
+                if (this.tiles[y][x].type === 'water') {
+                    tile.alpha = 0.6 + Math.sin(Date.now() * 0.003 + x + y) * 0.2;
+                }
+            }
+        }
+    }
+
+    /** Получить тип тайла по мировым координатам (used for pathfinding) */
+    getTileTypeAt(worldX, worldY) {
+        const tileX = Math.floor(worldX / this.tileSize);
+        const tileY = Math.floor(worldY / this.tileSize);
+        if (tileX < 0 || tileX >= this.mapWidth || tileY < 0 || tileY >= this.mapHeight) return null;
+        return this.tiles[tileY][tileX].type;
+    }
+
+    /** Пропускной способ: можно ли пройти через данный тайл (для pathfinding) */
+    isWalkable(worldX, worldY) {
+        const type = this.getTileTypeAt(worldX, worldY);
+        // Вода непроходима, дорога и трава – проходимы
+        return type !== 'water';
+    }
+}
+
+12. src/map/pathfinding.js
+
+// Очень простая реализация A* для демонстрации.
+// В реальной игре лучше использовать библиотеку или более оптимизированный код.
+import { Heap } from './heap.js'; // минимальная бинарная куча (определена ниже)
+
+export class Pathfinder {
+    /**
+     * @param {Tilemap} tilemap объект тайловой карты
+     */
+    constructor(tilemap) {
+        this.tilemap = tilemap;
+        this.tileSize = tilemap.tileSize;
+        this.width = tilemap.mapWidth;
+        this.height = tilemap.mapHeight;
+    }
+
+    /** Найти путь от (x0,y0) до (x1,y1) в мировых координатах.
+     *  Возвращает массив точек [{x,y}, ...] в мировых координатах (центры тайлов).
+     */
+    findPath(x0, y0, x1, y1) {
+        const start = this.worldToTile(x0, y0);
+        const end = this.worldToTile(x1, y1);
+        if (!start || !end) return [];
+        if (start.x === end.x && start.y === end.y) return [{ x: x0, y: y0 }];
+
+        const openList = new Heap((a, b) => a.f - b.f);
+        const closedSet = new Set();
+        const cameFrom = new Map();
+
+        const startNode = {
+            x: start.x,
+            y: start.y,
+            g: 0,
+            h: this.heuristic(start, end),
+            f: 0
+        };
+        startNode.f = startNode.g + startNode.h;
+        openList.push(startNode);
+
+        while (!openList.empty()) {
+            const current = openList.pop();
+            const key = `${current.x},${current.y}`;
+            if (closedSet.has(key)) continue;
+            if (current.x === end.x && current.y === end.y) {
+                // воссоздаём путь
+                const pathTiles = [];
+                let cur = current;
+                while (cur) {
+                    pathTiles.push({ x: cur.x, y: cur.y });
+                    const prev = cameFrom.get(`${cur.x},${cur.y}`);
+                    cur = prev ?? null;
+                }
+                pathTiles.reverse();
+                // translating tile centers to world coordinates (центры тайлов)
+                return pathTiles.map(t => ({
+                    x: t.x * this.tileSize + this.tileSize / 2,
+                    y: t.y * this.tileSize + this.tileSize / 2
+                }));
+            }
+            closedSet.add(key);
+            this._getNeighbors(current).forEach(neighbor => {
+                if (closedSet.has(`${neighbor.x},${neighbor.y}`)) return;
+                const tentativeG = current.g + this.distance(current, neighbor);
+                const neighborInOpen = [...openList.content].find(n => n.x === neighbor.x && n.y === neighbor.y);
+                if (!neighborInOpen || tentativeG < neighborInOpen.g) {
+                    cameFrom.set(`${neighbor.x},${neighbor.y}`, current);
+                    neighbor.g = tentativeG;
+                    neighbor.h = this.heuristic(neighbor, end);
+                    neighbor.f = neighbor.g + neighbor.h;
+                    if (!neighborInOpen) openList.push(neighbor);
+            });
+        }
+        // Путь не найден
+        return [];
+    }
+
+    heuristic(a, b) {
+        // Манхэттенское расстояние ( Under 4‑directional movement )
+        return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+    }
+
+    distance(a, b) {
+        // Стоимость перехода – 1 для ортогонального, sqrt(2) для диагонали (мы разрешим только ортогональную)
+        return 1;
+    }
+
+    _getNeighbors(node) {
+        const neighbors = [];
+        const dirs = [
+            { dx: 1, dy: 0 },
+            { dx: -1, dy: 0 },
+            { dx: 0, dy: 1 },
+            { dx: 0, dy: 0 }, // placeholder, will be replaced below with actual set
+            { dx: 0, dy: -1 }
+        ];
+        // Убираем дублирующий нулевой вектор и диагонали (если хотим 8‑направленность, добавляем)
+        const actualDirs = [
+            { dx: 1, dy: 0 },
+            { dx: -1, dy: 0 },
+            { dx: 0, dy: 1 },
+            { dx: 0, dy: -1 }
+        ];
+        for (const d of actualDirs) {
+            const nx = node.x + d.dx;
+            const ny = node.y + d.dy;
+            if (nx < 0 || nx >= this.width || ny < 0 || ny >= this.height) continue;
+            if (!this.tilemap.isWalkable(nx * this.tileSize + this.tileSize / 2,
+                                         ny * this.tileSize + this.tileSize / 2)) continue;
+            neighbors.push({ x: nx, y: ny, g: 0, h: 0, f: 0 });
+        }
+        return neighbors;
+    }
+
+    worldToTile(wx, wy) {
+        const tx = Math.floor(wx / this.tileSize);
+        const ty = Math.floor(wy / this.tileSize);
+        if (tx < 0 || tx >= this.width || ty < 0 || ty >= this.height) return null;
+        return { x: tx, y: ty };
+    }
+}
+
+/** Минимальная бинарная куча (min‑heap) – используется в A* */
+class Heap {
+    constructor(comparator) {
+        this.content = [];
+        this.compare = comparator;
+    }
+    push(element) {
+        this.content.push(
+        this._siftUp(this.content.length - 1);
+    }
+    pop() {
+        if (this.content.length === 0) return undefined;
+        const top = this.content[0];
+        const end = this.content.pop();
+        if (this.content.length > 0) {
+            this.content[0] = end;
+            this._siftDown(0);
+        }
+        return top;
+    }
+    empty() {
+        return this.content.length === 0;
+    }
+    _siftUp(idx) {
+        const element = this.content[idx];
+        while (idx > 0) {
+            const parentIdx = Math.floor((idx - 1) / 2);
+            const parent = this.content[parentIdx];
+            if (this.compare(element, parent) >= 0) break;
+            this.content[idx] = parent;
+            this.content[parentIdx] = element;
+            idx = parentIdx;
+        }
+        this.content[idx] = element;
+    }
+    _siftDown(idx) {
+        const length = this.content.length;
+        const element = this.content[idx];
+        while (true) {
+            let leftIdx = 2 * idx + 1;
+            let rightIdx = leftIdx + 1;
+            let swapIdx = -1;
+            if (leftIdx < length && this.compare(this.content[leftIdx], element) < 0) swapIdx = leftIdx;
+            if (rightIdx < length && this.compare(this.content[rightIdx], element) < 0 && (swapIdx === -1 || this.compare(this.content[rightIdx], this.content[swapIdx]) < 0)) swapIdx = rightIdx;
+            if (swapIdx === -1) break;
+            this.content[idx] = this.content[swapIdx];
+            this.content[swapIdx] = element;
+            idx = swapIdx;
+        }
+    }
+}
+
+13. src/ui/hud.js
+
+// HUD – отображает ресурсы и простые иконки
+import * as PIXI from 'pixi.js';
+
+export class HUD {
+    /**
+     * @param {PIXI.Container} container
+     */
+    constructor(container) {
+        this.container = new PIXI.Container();
+        container.addChild(this.container);
+        // Фон
+        this.bg = new PIXI.Graphics()
+            .beginFill(0x000000, 0.5)
+            .drawRoundedRect(0, 0, 220, 80, 10)
+            .endFill();
+        this.container.addChild(this.bg);
+        // Текст ресурсов
+        this.goldText = new PIXI.Text({ text: 'Золото: 0', style: { fontFamily: 'Arial', fontSize: 16, fill: 0xffd700 } });
+        this.elixirText = new PIXI.Text({ text: 'Эликсир: 0', style: { fontFamily: 'Arial', fontSize: 16, fill: 0xffc0cb } });
+        this.goldText.position.set(10, 10);
+        this.elixirText.position.set(10, 35);
+        this.container.addChild(this.goldText, this.elixirText);
+        // Кнопки (быстрый доступ)
+        this.buildBtn = this._createButton('Строить', 10, 60, 80, 30);
+        this.trainBtn = this._createButton('Тренировать', 100, 60, 100, 30);
+        this.battlePassBtn = this._createButton('Батл‑пас', 210, 60, 100, 30);
+        this.container.position.set(10, 10);
+    }
+
+    _createButton(label, x, y, width, height, onClick = null) {
+        const btn = new PIXI.Graphics()
+            .beginFill(0x4a90e2)
+            .drawRoundedRect(0, 0, width, height, 6)
+            .endFill();
+        btn.interactive = true;
+        btn.buttonMode = true;
+        if (onClick) btn.on('pointerdown', onClick);
+        btn.position.set(x, y);
+        const txt = new PIXI.Text({
+            text: label,
+            style: { fontFamily: 'Arial', fontSize: 14, fill: 0xffffff }
+        });
+        txt.position.set(x + 8, y + 8);
+        this.container.addChild(btn, txt);
+        return { graphics: btn, text: txt, onClick };
+    }
+
+    /** Обновить текст ресурсов */
+    update(delta, state) {
+        this.goldText.text = `Золото: ${Math.floor(state.gold || 0)}`;
+        this.elixirText.text = `Эликсир: ${Math.floor(state.elixir || 0)}`;
+    }
+
+    /** Позволяем внешним объектам подписаться на нажатия кнопок */
+    onBuildClick(cb) {
+        if (this.buildBtn && this.buildBtn.graphics) this.buildBtn.graphics.on('pointerdown', cb);
+    }
+    onTrainClick(cb) {
+        if (this.trainBtn && this.trainBtn.graphics) this.trainBtn.graphics.on('pointerdown', cb);
+    }
+    onBattlePassClick(cb) {
+        if (this.battlePassBtn && this.battlePassBtn.graphics) this.battlePassBtn.graphics.on('pointerdown', cb);
+    }
+}
+
+14. src/ui/menu.js
+
+// Простое меню построек – выбор типа здания и переключение режима строительства
+import * as PIXI from 'pixi.js';
+
+export class Menu {
+    /**
+     * @param {PIXI.Container} container
+     */
+    constructor(container) {
+        this.container = new PIXI.Container();
+        container.addChild(this.container);
+        this.buildingMode = false;
+        this.selectedType = 'goldMine'; // по умолчанию золотая шахта
+
+        // Панель меню
+        this.panel = new PIXI.Graphics()
+            .beginFill(0x000000, 0.6)
+            .drawRoundedRect(0, 0, 200, 140, 10)
+            .endFill();
+        this.container.addChild(this.panel);
+
+        // Кнопки выбора типа здания
+        this.types = ['goldMine', 'elixirCollector', 'storage', 'barracks'];
+        this.typeButtons = [];
+        this.types.forEach((type, i) => {
+            const btn = this._createTypeButton(type, 10, 10 + i * 30);
+            this.typeButtons.push(btn);
+            this.container.addChild(btn.graphics, btn.text);
+        });
+
+        // Кнопка включения/выключения режима строительства
+        this.buildModeBtn = this._createButton('Строить: ВЫКЛ', 10, 130, 180, 30, () => this.toggleBuildMode());
+        this.container.addChild(this.buildModeBtn.graphics, this.buildModeBtn.text);
+    }
+
+    _createTypeButton(type, x, y) {
+        const btn = new PIXI.Graphics()
+            .beginFill(0x555555)
+            .drawRoundedRect(0, 0, 180, 25, 5)
+            .endFill();
+        btn.interactive = true;
+        btn.buttonMode = true;
+        btn.on('pointerdown', () => this.selectType(type));
+        btn.position.set(x, y);
+        const label = new PIXI.Text({
+            text: this._typeLabel(type),
+            style: { fontFamily: 'Arial', fontSize: 14, fill: 0xffffff }
+        });
+        label.position.set(x + 8, y + 6);
+        return { graphics: btn, text: label, type };
+    }
+
+    _createButton(label, x, y, width, height, onClick) {
+        const btn = new PIXI.Graphics()
+            .beginFill(0x4a90e2)
+            .drawRoundedRect(0, 0, width, height, 6)
+            .endFill();
+        btn.interactive = true;
+        btn.buttonMode = true;
+        if (onClick) btn.on('pointerdown', onClick);
+        btn.position.set(x, y);
+        const txt = new PIXI.Text({
+            text: label,
+            style: { fontFamily: 'Arial', fontSize: 14, fill: 0xffffff }
+        });
+        txt.position.set(x + 8, y + 8);
+        return { graphics: btn, text: txt };
+    }
+
+    selectType(type) {
+        this.selectedType = type;
+        // Обновить визуальное выделение
+        this.typeButtons.forEach(b => {
+            b.graphics.tint = b.type === type ? 0xf1c40f : 0x555555;
+        });
+    }
+    getSelectedBuildingType() {
+        return this.selectedType;
+    }
+    toggleBuildMode() {
+        this.buildingMode = !this.buildingMode;
+        this.buildModeBtn.graphics.tint = this.buildingMode ? 0x2ecc71 : 0x4a90e2;
+        this.buildModeBtn.text.text = `Строить: ${this.buildingMode ? 'ВКЛ' : 'ВЫКЛ'}`;
+    }
+    isBuildingMode() {
+        return this.buildingMode;
+    }
+    exitBuildingMode() {
+        this.buildingMode = false;
+        this.buildModeBtn.graphics.tint = 0x4a90e2;
+        this.buildModeBtn.text.text = 'Строить: ВЫКЛ';
+    }
+    _typeLabel(type) {
+        switch (type) {
+            case 'goldMine': return 'Золотая шахта';
+            case 'elixirCollector': return 'Эликсир‑коллектор';
+            case 'storage': return 'Склад';
+            case 'barracks': return 'Караул';
+            default: return type;
+        }
+    }
+}
+
+15. src/ui/battlePass.js
+
+// Заглушка для будущей системы батл‑паса. Сейчас просто отображает уровень и прогресс.
+import * as PIXI from 'pixi.js';
+
+export class BattlePass {
+    /**
+     * @param {PIXI.Container} container
+     */
+    constructor(container) {
+        this.container = new PIXI.Container();
+        container.addChild(this.container);
+        this.bg = new PIXI.Graphics()
+            .beginFill(0x000000, 0.4)
+            .drawRoundedRect(0, 0, 250, 60, 8)
+            .endFill();
+        this.container.addChild(this.bg);
+        this.levelText = new PIXI.Text({
+            text: 'Батл‑пас: ур. 0',
+            style: { fontFamily: 'Arial', fontSize: 16, fill: 0xf1c40f }
+        });
+        this.levelText.position.set(10, 10);
+        this.container.addChild(this.levelText);
+        this.progressBar = new PIXI.Graphics()
+            .beginFill(0x3498db)
+            .drawRoundedRect(0, 0, 200, 20, 4)
+            .endFill();
+        this.progressBar.position.set(10, 35);
+        this.container.addChild(this.progressBar);
+        this.container.position.set(window.innerWidth - 260, 10);
+    }
+
+    update(delta) {
+        // Здесь можно обновлять прогресс на основе опыта, выполненных квестов и т.д.
+        // Для демо просто медленно заполняем
+        const progress = (Date.now() / 1000) % 20 / 20; // 0‑1 за 20 секунд
+        this.progressBar.clear()
+            .beginFill(0x3498db)
+            .drawRoundedRect(0, 0, 200 * progress, 20, 4)
+            .endFill();
+        // Пример: повышение уровня каждые 100 секунд
+        const lvl = Math.floor((Date.now() / 1000) / 100);
+        this.levelText.text = `Батл‑пас: ур. ${lvl}`;
+    }
+}
+
+16. src/ui/shop.js
+
+// Заглушка магазина – покупка улучшений, ускорителей и т.д.
+import * as PIXI from 'pixi.js';
+
+export class Shop {
+    /**
+     * @param {PIXI.Container} container
+     */
+    constructor(container) {
+        this.container = new PIXI.Container();
+        container.addChild(this.container);
+        this.bg = new PIXI.Graphics()
+            .beginFill(0x000000, 0.5)
+            .drawRoundedRect(0, 0, 280, 180, 10)
+            .endFill();
+        this.container.addChild(this.bg);
+        this.title = new PIXI.Text({
+            text: 'Магазин',
+            style: { fontFamily: 'Arial', fontSize: 20, fill: 0xecf0f1 }
+        });
+        this.title.position.set(10, 10);
+        this.container.addChild(this.title);
+        // Пример товара – ускоритель производства
+        this.boostBtn = this._createButton('Ускорить производство (+50%)', 15, 50, 250, 35, () => {
+            console.log('Куплен ускоритель производства');
+            // Туда будет логика применения буста
+        });
+        this.container.addChild(this.boostBtn.graphics, this.boostBtn.text);
+        this.container.position.set(window.innerWidth / 2 - 140, window.innerHeight - 200);
+    }
+
+    _createButton(label, x, y, width, height, onClick) {
+        const btn = new PIXI.Graphics()
+            .beginFill(0x27ae60)
+            .drawRoundedRect(0, 0, width, height, 6)
+            .endFill();
+        btn.interactive = true;
+        btn.buttonMode = true;
+        if (onClick) btn.on('pointerdown', onClick);
+        btn.position.set(x, y);
+        const txt = new PIXI.Text({
+            text: label,
+            style: { fontFamily: 'Arial', fontSize: 14, fill: 0xffffff }
+        });
+        txt.position.set(x + 8, y + 8);
+        return { graphics: btn, text: txt };
+    }
+
+    update(delta) {
+        // Можно добавить таймеры скидок, rotating предложений и т.д.
+    }
+}
+
+17. src/data/heroes.json
+
+{
+  "heroes": [
+    {
+      "id": "swordmaster",
+      "name": "Мечник",
+      "baseHealth": 100,
+      "baseAttack": 12,
+      "abilities": [
+        { "name": "Удар меча", "cooldown": 4, "description": "Наносит урон по площади 150px" },
+        { "name": "Щитовая стена", "cooldown": 8, "description": "Увеличивает защиту на 30% на 5 сек" }
+      ]
+    },
+    {
+      "id": "archer",
+      "name": "Лучник",
+      "baseHealth": 80,
+      "baseAttack": 10,
+      "ranged": true,
+      "abilities": [
+        { "name": "Меткий выстрел", "cooldown": 3, "description": "Удвоенный урон на одну цель" },
+        { "name": "Уклонение", "cooldown": 6, "description": "Временно увеличивает уклонение" }
+      ]
+    }
+  ]
+}
+
+18. src/data/buildings.json
+
+{
+  "buildings": [
+    {
+      "id": "goldMine",
+      "name": "Золотая шахта",
+      "baseProduction": 2,
+      "baseCapacity": 500,
+      "upgradeCost": { "gold": 100, "elixir": 50 }
+    },
+    {
+      "id": "elixirCollector",
+      "name": "Эликсир‑коллектор",
+      "baseProduction": 1.5,
+      "baseCapacity": 400,
+      "upgradeCost": { "gold": 80, "elixir": 40 }
+    },
+    {
+      "id": "storage",
+      "name": "Склад",
+      "baseCapacity": 1000,
+      "upgradeCost": { "gold": 120, "elixir": 60 }
+    },
+    {
+      "id": "barracks",
+      "name": "Караул",
+      "trainTime": 5,
+      "upgradeCost": { "gold": 150, "elixir": 75 }
+    }
+  ]
+}
+
+19. src/data/troops.json
+
+{
+  "troops": [
+    {
+      "id": "barbarian",
+      "name": "Варвар",
+      "speed": 80,
+      "health": 30,
+      "damage": 8,
+      "range": 30,
+      "trainCost": { "gold": 50 },
+      "trainTime": 3
+    },
+    {
+      "id": "archer",
+      "name": "Лучник",
+      "speed": 70,
+      "health": 20,
+      "damage": 12,
+      "range": 150,
+      "trainCost": { "elixir": 40 },
+      "trainTime": 4
+    },
+    {
+      "id": "giant",
+      "name": "Гигант",
+      "speed": 50,
+      "health": 120,
+      "damage": 20,
+      "range": 40,
+      "trainCost": { "gold": 150, "elixir": 75 },
+      "trainTime": 8
+    }
+  ]
+}
+
+20. src/main.js
+
+// Точка входа – создаём движок и запускаем игру
+import { Engine } from './engine/engine.js';
+
+window.addEventListener('load', () => {
+    // Создаём движок, указывая id контейнера из index.html
+    const engine = new Engine('game-container');
+    // Экспортируем в глобальную область для отладки (по желанию)
+    window.__engine = engine;
+});
+
+21. README.md
+
+# Clash of Clones – одиночная стратегия (HTML5 + PixiJS)
+
+Это стартовый шаблон игры в стиле *Clash of Clans*, реализованный полностью на клиенте (без серверной части).
+Проект использует:
+
+- **PixiJS v7** – лёгкий 2D‑рендерер для Canvas/WebGL
+- **ES‑модули** (type="module") – удобная разбивка на файлы
+      "damage": 12,
+      "range": 150,
+      "trainCost": { "elixir": 40 },
+      "trainTime": 4
+    },
+    {
+      "id": "giant",
+      "name": "Гигант",
+      "speed": 50,
+      "health": 120,
+      "damage": 20,
+      "range": 40,
+      "trainCost": { "gold": 150, "elixir": 75 },
+      "trainTime": 8
+    }
+  ]
+}
+
+20. src/main.js
+
+// Точка входа – создаём движок и запускаем игру
+import { Engine } from './engine/engine.js';
+
+window.addEventListener('load', () => {
+    // Создаём движок, указывая id контейнера из index.html
+    const engine = new Engine('game-container');
+    // Экспортируем в глобальную область для отладки (по желанию)
+    window.__engine = engine;
+});
