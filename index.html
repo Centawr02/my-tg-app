@@ -36,7 +36,6 @@
             position: relative;
         }
 
-        /* ===== BACKGROUND ANIMATION ===== */
         .bg-particles {
             position: fixed;
             top: 0; left: 0;
@@ -69,7 +68,6 @@
             100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
         }
 
-        /* ===== HEADER ===== */
         .header {
             position: relative;
             z-index: 10;
@@ -95,13 +93,8 @@
             border-radius: 20px;
             border: 1px solid rgba(245,197,24,0.2);
         }
-        .header-balance .coin-icon {
-            font-size: 18px;
-        }
-        .header-balance .amount {
-            font-size: 16px;
-            font-weight: 800;
-        }
+        .header-balance .coin-icon { font-size: 18px; }
+        .header-balance .amount { font-size: 16px; font-weight: 800; }
         .level-badge {
             background: linear-gradient(135deg, var(--accent), var(--accent2));
             color: #000;
@@ -111,7 +104,6 @@
             border-radius: 12px;
         }
 
-        /* ===== MAIN SCREEN ===== */
         .main-screen {
             position: relative;
             z-index: 5;
@@ -121,7 +113,6 @@
             padding: 10px 20px 100px;
         }
 
-        /* ===== STATS ROW ===== */
         .stats-row {
             display: flex;
             gap: 12px;
@@ -142,7 +133,6 @@
         .stat-card .stat-label { font-size: 10px; color: var(--text2); margin-top: 1px; }
         .stat-card.per-second { border-color: rgba(0,230,118,0.15); }
 
-        /* ===== CHARACTER ===== */
         .character-wrap {
             position: relative;
             margin: 12px 0 10px;
@@ -185,7 +175,6 @@
             100% { transform: scale(1); }
         }
 
-        /* ===== FLOATING +COIN ===== */
         .float-coin {
             position: fixed;
             pointer-events: none;
@@ -201,7 +190,6 @@
             100% { opacity: 0; transform: translateY(-120px) scale(0.6); }
         }
 
-        /* ===== BOTTOM NAV ===== */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -254,7 +242,6 @@
             font-weight: 700;
         }
 
-        /* ===== PANELS ===== */
         .panel {
             display: none;
             width: 100%;
@@ -272,7 +259,6 @@
         }
         .panel-title span { color: var(--accent); }
 
-        /* ===== SHOP ===== */
         .shop-item {
             background: var(--card);
             border-radius: var(--radius);
@@ -328,7 +314,6 @@
             cursor: not-allowed;
         }
 
-        /* ===== PREMIUM / DONATE ===== */
         .premium-banner {
             background: linear-gradient(135deg, rgba(255,107,53,0.1), rgba(156,39,176,0.1));
             border: 1px solid rgba(255,107,53,0.2);
@@ -476,7 +461,6 @@
         .perk .perk-icon { font-size: 20px; }
         .perk .perk-text { font-size: 11px; color: var(--text2); margin-top: 2px; }
 
-        /* ===== MODAL ===== */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0;
@@ -519,12 +503,10 @@
         }
         .modal-btn:active { transform: scale(0.95); }
 
-        /* ===== SCROLLBAR ===== */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
 
-        /* ===== RESPONSIVE ===== */
         @media (max-width: 380px) {
             .character-wrap { width: 160px; height: 160px; }
             .character-glow { width: 200px; height: 200px; top: -20px; left: -20px; }
@@ -532,14 +514,12 @@
     </style>
 </head>
 <body>
-    <!-- Background Particles -->
     <div class="bg-particles">
         <span></span><span></span><span></span>
         <span></span><span></span><span></span>
         <span></span><span></span>
     </div>
 
-    <!-- Header -->
     <div class="header">
         <div class="header-title">💰 Money Tycoon</div>
         <div class="header-balance">
@@ -549,9 +529,7 @@
         </div>
     </div>
 
-    <!-- Main Screen -->
     <div class="main-screen">
-        <!-- Stats -->
         <div class="stats-row">
             <div class="stat-card">
                 <div class="stat-icon">👆</div>
@@ -570,19 +548,16 @@
             </div>
         </div>
 
-        <!-- Character -->
         <div class="character-wrap">
             <div class="character-glow"></div>
             <img id="character" src="https://i.ibb.co/gbPQNt9w/7-UJ8-Yc-f-ZK89-Hu1-XLaj-SWODNp-ZDIXc1-Xqylde4-HAW2-AWM0-OYpi-ZWSh-UVh1-nwv-N04-F3-Qsu-DMSC0qt-N4-H9-KF4f-Y.jpg" alt="Персонаж" draggable="false">
         </div>
 
-        <!-- Panels: Shop -->
         <div class="panel active" id="panelMain">
             <div class="panel-title">🏪 <span>Магазин</span></div>
             <div id="shopList"></div>
         </div>
 
-        <!-- Panels: Premium -->
         <div class="panel" id="panelPremium">
             <div class="panel-title">💎 <span>Премиум</span></div>
             <div class="premium-banner">
@@ -591,7 +566,6 @@
                 <div class="price-tag">$9.99 / мес</div>
             </div>
 
-            <!-- CARD PAYMENT -->
             <div class="donate-card">
                 <h3><span class="emoji">💳</span>Оплата картой</h3>
                 <input class="donate-input" id="cardName" placeholder="Имя на карте" value="IVAN IVANOV">
@@ -604,25 +578,20 @@
                 <div class="donate-result" id="cardResult"></div>
             </div>
 
-            <!-- CRYPTO PAYMENT -->
             <div class="donate-card">
                 <h3><span class="emoji">₿</span>Оплата криптой</h3>
                 <div class="crypto-options" id="cryptoOptions">
                     <div class="crypto-btn selected" data-coin="btc">
-                        <span class="crypto-icon">₿</span>
-                        Bitcoin
+                        <span class="crypto-icon">₿</span> Bitcoin
                     </div>
                     <div class="crypto-btn" data-coin="eth">
-                        <span class="crypto-icon">⟠</span>
-                        Ethereum
+                        <span class="crypto-icon">⟠</span> Ethereum
                     </div>
                     <div class="crypto-btn" data-coin="ton">
-                        <span class="crypto-icon">💎</span>
-                        TON
+                        <span class="crypto-icon">💎</span> TON
                     </div>
                     <div class="crypto-btn" data-coin="usdt">
-                        <span class="crypto-icon">₮</span>
-                        USDT
+                        <span class="crypto-icon">₮</span> USDT
                     </div>
                 </div>
                 <input class="donate-input" id="cryptoAddress" placeholder="Адрес кошелька" value="0x742d35Cc6634C0532925a3b844Bc9e7595f2bD18">
@@ -630,7 +599,6 @@
                 <div class="donate-result" id="cryptoResult"></div>
             </div>
 
-            <!-- FAKE PERKS -->
             <div class="premium-perks">
                 <div class="perk"><div class="perk-icon">⚡</div><div class="perk-text">Доход x2</div></div>
                 <div class="perk"><div class="perk-icon">🖼️</div><div class="perk-text">Уникальный скин</div></div>
@@ -642,20 +610,16 @@
         </div>
     </div>
 
-    <!-- Bottom Nav -->
     <div class="bottom-nav">
         <button class="nav-btn active" data-panel="panelMain">
-            <span class="nav-icon">🏪</span>
-            Магазин
+            <span class="nav-icon">🏪</span> Магазин
         </button>
         <button class="nav-btn" data-panel="panelPremium">
-            <span class="nav-icon">💎</span>
-            Премиум
+            <span class="nav-icon">💎</span> Премиум
             <span class="badge">🔥</span>
         </button>
     </div>
 
-    <!-- Modal -->
     <div class="modal-overlay" id="modalOverlay">
         <div class="modal-content">
             <div class="modal-icon" id="modalIcon">🎉</div>
@@ -666,162 +630,69 @@
     </div>
 
     <script>
-        // ===== GAME STATE =====
         const game = {
             coins: 0,
             totalTaps: 0,
             tapPower: 1,
             earnPerSec: 0,
             level: 1,
-            upgradeLevels: {
-                tap: 0,
-                income: 0,
-                crit: 0,
-                auto: 0,
-                multi: 0
-            },
+            upgradeLevels: { tap: 0, income: 0, crit: 0, auto: 0, multi: 0 },
             premium: false
         };
 
-        // ===== UPGRADES CONFIG =====
         const upgrades = [
-            {
-                id: 'tap',
-                name: '👆 Сила тапа',
-                desc: 'Больше монет за каждый тап',
-                icon: '💪',
-                iconClass: 'lv1',
-                baseCost: 10,
-                costMult: 1.5,
-                maxLevel: 20,
-                effect: (lvl) => `+${lvl + 1} за тап`,
-                apply: (lvl) => { game.tapPower = 1 + lvl; }
-            },
-            {
-                id: 'income',
-                name: '⚡ Пассивный доход',
-                desc: 'Монеты капают сами',
-                icon: '📈',
-                iconClass: 'lv2',
-                baseCost: 50,
-                costMult: 1.6,
-                maxLevel: 25,
-                effect: (lvl) => `+${(lvl + 1)}/сек`,
-                apply: (lvl) => { game.earnPerSec = game.upgradeLevels.auto > 0 ? (lvl + 1) * 2 : (lvl + 1); }
-            },
-            {
-                id: 'crit',
-                name: '🍀 Крит. шанс',
-                desc: 'x3 монеты при крите',
-                icon: '✨',
-                iconClass: 'lv3',
-                baseCost: 100,
-                costMult: 1.7,
-                maxLevel: 15,
-                effect: (lvl) => `${Math.min(5 + lvl * 3, 50)}%`,
-                apply: () => {}
-            },
-            {
-                id: 'auto',
-                name: '🤖 Авто-тап',
-                desc: 'Автоматические тапы в секунду',
-                icon: '⚙️',
-                iconClass: 'lv4',
-                baseCost: 200,
-                costMult: 1.8,
-                maxLevel: 15,
-                effect: (lvl) => `${lvl}/сек`,
-                apply: (lvl) => {
-                    game.earnPerSec = game.upgradeLevels.income > 0 
-                        ? (game.upgradeLevels.income + 1) * 2 + lvl 
-                        : (lvl + 1);
-                }
-            },
-            {
-                id: 'multi',
-                name: '🔁 Множитель дохода',
-                desc: 'x2 к пассивному доходу',
-                icon: '🚀',
-                iconClass: 'lv2',
-                baseCost: 500,
-                costMult: 2.0,
-                maxLevel: 10,
-                effect: (lvl) => `x${lvl + 1}`,
-                apply: () => {}
-            }
+            { id: 'tap', name: '👆 Сила тапа', desc: 'Больше монет за каждый тап', icon: '💪', iconClass: 'lv1', baseCost: 10, costMult: 1.5, maxLevel: 20, effect: (l) => `+${l+1} за тап`, apply: (l) => { game.tapPower = 1 + l; } },
+            { id: 'income', name: '⚡ Пассивный доход', desc: 'Монеты капают сами', icon: '📈', iconClass: 'lv2', baseCost: 50, costMult: 1.6, maxLevel: 25, effect: (l) => `+${l+1}/сек`, apply: (l) => { game.earnPerSec = (game.upgradeLevels.auto > 0 ? (l+1)*2 : l+1); } },
+            { id: 'crit', name: '🍀 Крит. шанс', desc: 'x3 монеты при крите', icon: '✨', iconClass: 'lv3', baseCost: 100, costMult: 1.7, maxLevel: 15, effect: (l) => `${Math.min(5+l*3,50)}%`, apply: () => {} },
+            { id: 'auto', name: '🤖 Авто-тап', desc: 'Автоматические тапы', icon: '⚙️', iconClass: 'lv4', baseCost: 200, costMult: 1.8, maxLevel: 15, effect: (l) => `${l}/сек`, apply: (l) => { game.earnPerSec = (game.upgradeLevels.income > 0 ? (game.upgradeLevels.income+1)*2 + l : l+1); } },
+            { id: 'multi', name: '🔁 Множитель', desc: 'x2 к пассивному доходу', icon: '🚀', iconClass: 'lv2', baseCost: 500, costMult: 2.0, maxLevel: 10, effect: (l) => `x${l+1}`, apply: () => {} }
         ];
-    <script>
-        // ===== CONTINUED =====
 
-        // ===== SAVE / LOAD =====
-        function saveGame() {
-            try {
-                localStorage.setItem('moneyTycoonSave', JSON.stringify(game));
-            } catch(e) {}
-        }
+        function saveGame() { try { localStorage.setItem('moneyTycoonSave', JSON.stringify(game)); } catch(e) {} }
+        function loadGame() { try { const d = localStorage.getItem('moneyTycoonSave'); if (d) Object.assign(game, JSON.parse(d)); } catch(e) {} }
 
-        function loadGame() {
-            try {
-                const data = localStorage.getItem('moneyTycoonSave');
-                if (data) {
-                    const parsed = JSON.parse(data);
-                    Object.assign(game, parsed);
-                }
-            } catch(e) {}
-        }
-
-        // ===== COST CALC =====
         function getCost(id) {
-            const upg = upgrades.find(u => u.id === id);
-            if (!upg) return 999999;
-            const lvl = game.upgradeLevels[id] || 0;
-            return Math.floor(upg.baseCost * Math.pow(upg.costMult, lvl));
+            const u = upgrades.find(x => x.id === id);
+            if (!u) return 999999;
+            return Math.floor(u.baseCost * Math.pow(u.costMult, game.upgradeLevels[id] || 0));
         }
 
-        // ===== FORMAT =====
         function formatNum(n) {
-            if (n >= 1e9) return (n / 1e9).toFixed(1) + 'B';
-            if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
-            if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
+            if (n >= 1e9) return (n/1e9).toFixed(1)+'B';
+            if (n >= 1e6) return (n/1e6).toFixed(1)+'M';
+            if (n >= 1e3) return (n/1e3).toFixed(1)+'K';
             return Math.floor(n).toString();
         }
 
-        // ===== RECALC STATS =====
         function recalcStats() {
-            const lvl = game.upgradeLevels;
-            let baseTap = 1 + lvl.tap;
-            let baseEarn = (lvl.income + 1) + (lvl.auto || 0);
-            if (lvl.multi > 0) baseEarn *= (lvl.multi + 1);
-            game.tapPower = baseTap;
-            game.earnPerSec = baseEarn;
-
-            // Level based on total upgrades
-            const total = lvl.tap + lvl.income + lvl.crit + lvl.auto + lvl.multi;
-            game.level = Math.floor(total / 3) + 1;
-            if (game.level > 30) game.level = 30;
+            const l = game.upgradeLevels;
+            game.tapPower = 1 + l.tap;
+            let base = (l.income + 1) + (l.auto || 0);
+            if (l.multi > 0) base *= (l.multi + 1);
+            game.earnPerSec = base;
+            const tot = l.tap + l.income + l.crit + l.auto + l.multi;
+            game.level = Math.min(30, Math.floor(tot / 3) + 1);
         }
 
-        // ===== RENDER =====
         function renderHeader() {
             document.getElementById('headerCoins').textContent = formatNum(game.coins);
-            document.getElementById('levelBadge').textContent = `Lv.${game.level}`;
+            document.getElementById('levelBadge').textContent = 'Lv.' + game.level;
             document.getElementById('tapPowerDisplay').textContent = game.tapPower;
             document.getElementById('earnPerSecDisplay').textContent = formatNum(game.earnPerSec);
             document.getElementById('totalTapsDisplay').textContent = formatNum(game.totalTaps);
         }
 
         function renderShop() {
-            const container = document.getElementById('shopList');
-            container.innerHTML = '';
+            const c = document.getElementById('shopList');
+            c.innerHTML = '';
             upgrades.forEach(u => {
                 const lvl = game.upgradeLevels[u.id] || 0;
                 const maxed = lvl >= u.maxLevel;
                 const cost = getCost(u.id);
                 const canBuy = game.coins >= cost && !maxed;
-
-                const item = document.createElement('div');
-                item.className = 'shop-item';
-                item.innerHTML = `
+                const el = document.createElement('div');
+                el.className = 'shop-item';
+                el.innerHTML = `
                     <div class="shop-item-left">
                         <div class="shop-item-icon ${u.iconClass}">${u.icon}</div>
                         <div class="shop-item-info">
@@ -830,232 +701,136 @@
                             <div class="shop-level">${maxed ? 'MAX' : 'Ур. ' + lvl + ' → ' + u.effect(lvl)}</div>
                         </div>
                     </div>
-                    <button class="shop-btn ${maxed ? 'maxed' : ''}" 
-                            data-id="${u.id}" 
-                            ${!canBuy || maxed ? 'disabled' : ''}>
+                    <button class="shop-btn ${maxed ? 'maxed' : ''}" data-id="${u.id}" ${!canBuy || maxed ? 'disabled' : ''}>
                         ${maxed ? 'MAX ✅' : '💰 ' + formatNum(cost)}
-                    </button>
-                `;
-                container.appendChild(item);
-
-                const btn = item.querySelector('.shop-btn');
-                btn.addEventListener('click', () => buyUpgrade(u.id));
+                    </button>`;
+                c.appendChild(el);
+                el.querySelector('.shop-btn').onclick = () => buyUpgrade(u.id);
             });
         }
 
-        // ===== BUY =====
         function buyUpgrade(id) {
-            const upg = upgrades.find(u => u.id === id);
-            if (!upg) return;
+            const u = upgrades.find(x => x.id === id);
+            if (!u) return;
             const lvl = game.upgradeLevels[id] || 0;
-            if (lvl >= upg.maxLevel) return;
+            if (lvl >= u.maxLevel) return;
             const cost = getCost(id);
             if (game.coins < cost) return;
-
             game.coins -= cost;
             game.upgradeLevels[id] = lvl + 1;
             recalcStats();
-            upg.apply(game.upgradeLevels[id]);
-
+            u.apply(game.upgradeLevels[id]);
             saveGame();
             renderHeader();
             renderShop();
-
-            // Show modal
-            showModal('🎉', 'Апгрейд!', `${upg.name} → ${upg.effect(game.upgradeLevels[id])}`);
+            showModal('🎉', 'Апгрейд!', u.name + ' → ' + u.effect(game.upgradeLevels[id]));
         }
 
-        // ===== TAP =====
-        let tapTimeout = null;
-
+        let tapTimeout;
         function tap(e) {
             const char = document.getElementById('character');
             char.classList.remove('tap-anim');
             void char.offsetWidth;
             char.classList.add('tap-anim');
-
-            // Calculate coins earned
             let earned = game.tapPower;
-
-            // Crit check
-            const critLvl = game.upgradeLevels.crit || 0;
-            const critChance = Math.min(5 + critLvl * 3, 50);
-            let isCrit = false;
-            if (critLvl > 0 && Math.random() * 100 < critChance) {
-                earned *= 3;
-                isCrit = true;
-            }
-
-            // Premium bonus
+            const cl = game.upgradeLevels.crit || 0;
+            if (cl > 0 && Math.random() * 100 < Math.min(5 + cl * 3, 50)) { earned *= 3; }
             if (game.premium) earned *= 2;
-
             game.coins += earned;
             game.totalTaps += 1;
-
-            // Float text
-            showFloatCoin(earned, isCrit);
-
-            // Update UI
-            renderHeader();
-
-            // Debounced save
-            clearTimeout(tapTimeout);
-            tapTimeout = setTimeout(saveGame, 500);
-        }
-
-        // ===== FLOAT COIN =====
-        function showFloatCoin(amount, isCrit) {
             const el = document.createElement('div');
             el.className = 'float-coin';
-            el.textContent = (isCrit ? '✨ ' : '+') + Math.floor(amount);
-            if (isCrit) el.style.color = '#ff6b35';
+            el.textContent = '+' + Math.floor(earned);
             el.style.left = (40 + Math.random() * 20) + '%';
             el.style.top = (35 + Math.random() * 15) + '%';
             document.body.appendChild(el);
             setTimeout(() => el.remove(), 1000);
+            renderHeader();
+            clearTimeout(tapTimeout);
+            tapTimeout = setTimeout(saveGame, 500);
         }
 
-        // ===== PASSIVE INCOME TICK =====
         function passiveTick() {
             if (game.earnPerSec > 0) {
-                // Divide by 2 for half-second ticks
-                const tickAmount = Math.max(1, Math.floor(game.earnPerSec / 2));
-                game.coins += tickAmount;
+                game.coins += Math.max(1, Math.floor(game.earnPerSec / 2));
                 renderHeader();
                 saveGame();
             }
         }
 
-        // ===== MODAL =====
         function showModal(icon, title, text) {
             document.getElementById('modalIcon').textContent = icon;
             document.getElementById('modalTitle').textContent = title;
             document.getElementById('modalText').textContent = text;
             document.getElementById('modalOverlay').classList.add('show');
         }
-        document.getElementById('modalBtn').addEventListener('click', () => {
-            document.getElementById('modalOverlay').classList.remove('show');
+
+        document.getElementById('modalBtn').onclick = () => document.getElementById('modalOverlay').classList.remove('show');
+        document.getElementById('modalOverlay').onclick = (e) => { if (e.target === e.currentTarget) document.getElementById('modalOverlay').classList.remove('show'); };
+
+        document.querySelectorAll('.nav-btn').forEach(b => {
+            b.onclick = () => {
+                document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active'));
+                document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+                b.classList.add('active');
+                document.getElementById(b.dataset.panel).classList.add('active');
+            };
         });
-        document.getElementById('modalOverlay').addEventListener('click', (e) => {
-            if (e.target === e.currentTarget) {
-                document.getElementById('modalOverlay').classList.remove('show');
+
+        document.getElementById('cardPayBtn').onclick = function() {
+            const r = document.getElementById('cardResult');
+            if (!document.getElementById('cardName').value.trim() || !document.getElementById('cardNumber').value.trim() || !document.getElementById('cardExp').value.trim() || !document.getElementById('cardCvv').value.trim()) {
+                r.className = 'donate-result error'; r.textContent = '❌ Заполните все поля!'; return;
             }
-        });
-
-        // ===== NAV =====
-        document.querySelectorAll('.nav-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-                btn.classList.add('active');
-                document.getElementById(btn.dataset.panel).classList.add('active');
-            });
-        });
-
-        // ===== PREMIUM / FAKE DONATE =====
-        // Card pay
-        document.getElementById('cardPayBtn').addEventListener('click', function() {
-            const result = document.getElementById('cardResult');
-            const name = document.getElementById('cardName').value.trim();
-            const card = document.getElementById('cardNumber').value.trim();
-            const exp = document.getElementById('cardExp').value.trim();
-            const cvv = document.getElementById('cardCvv').value.trim();
-
-            if (!name || !card || !exp || !cvv) {
-                result.className = 'donate-result error';
-                result.textContent = '❌ Заполните все поля!';
-                return;
-            }
-
-            // Fake processing
-            this.textContent = '⏳ Обработка...';
-            this.classList.add('processing');
-            this.disabled = true;
-            result.className = 'donate-result';
-            result.textContent = '';
-
+            this.textContent = '⏳ Обработка...'; this.classList.add('processing'); this.disabled = true; r.className = 'donate-result'; r.textContent = '';
             setTimeout(() => {
-                this.textContent = '💳 Оплатить $9.99';
-                this.classList.remove('processing');
-                this.disabled = false;
-                result.className = 'donate-result error';
-                result.textContent = '❌ Ошибка! Банк отклонил транзакцию (код: ERR-9724). Пожалуйста, попробуйте другую карту.';
+                this.textContent = '💳 Оплатить $9.99'; this.classList.remove('processing'); this.disabled = false;
+                r.className = 'donate-result error'; r.textContent = '❌ Ошибка! Банк отклонил транзакцию (код: ERR-9724)';
             }, 2500);
-        });
+        };
 
-        // Crypto options
-        document.querySelectorAll('.crypto-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.crypto-btn').forEach(b => b.classList.remove('selected'));
+        document.querySelectorAll('.crypto-btn').forEach(b => {
+            b.onclick = function() {
+                document.querySelectorAll('.crypto-btn').forEach(x => x.classList.remove('selected'));
                 this.classList.add('selected');
-                const coin = this.dataset.coin;
                 const names = { btc: 'BTC', eth: 'ETH', ton: 'TON', usdt: 'USDT' };
-                document.getElementById('cryptoPayBtn').textContent = `₿ Оплатить $9.99 в ${names[coin] || coin}`;
-            });
+                document.getElementById('cryptoPayBtn').textContent = '₿ Оплатить $9.99 в ' + (names[this.dataset.coin] || this.dataset.coin);
+            };
         });
 
-        document.getElementById('cryptoPayBtn').addEventListener('click', function() {
-            const result = document.getElementById('cryptoResult');
+        document.getElementById('cryptoPayBtn').onclick = function() {
+            const r = document.getElementById('cryptoResult');
             const selected = document.querySelector('.crypto-btn.selected');
-            const coinName = selected ? selected.textContent.trim().split('\n')[1] : 'BTC';
-            const address = document.getElementById('cryptoAddress').value.trim();
-
-            if (!address) {
-                result.className = 'donate-result error';
-                result.textContent = '❌ Введите адрес кошелька!';
-                return;
+            const cn = selected ? selected.textContent.trim().split('\n')[1] : 'BTC';
+            if (!document.getElementById('cryptoAddress').value.trim()) {
+                r.className = 'donate-result error'; r.textContent = '❌ Введите адрес кошелька!'; return;
             }
-
-            this.textContent = '⏳ Подтверждение транзакции...';
-            this.classList.add('processing');
-            this.disabled = true;
-            result.className = 'donate-result';
-            result.textContent = '';
-
+            this.textContent = '⏳ Подтверждение...'; this.classList.add('processing'); this.disabled = true; r.className = 'donate-result'; r.textContent = '';
             setTimeout(() => {
-                this.textContent = '₿ Оплатить $9.99';
-                this.classList.remove('processing');
-                this.disabled = false;
-                result.className = 'donate-result error';
-                result.textContent = `❌ Ошибка сети! Транзакция ${coinName} не прошла. Недостаточно газа (Gwei: 124). Попробуйте позже.`;
+                this.textContent = '₿ Оплатить $9.99'; this.classList.remove('processing'); this.disabled = false;
+                r.className = 'donate-result error'; r.textContent = '❌ Ошибка сети! Недостаточно газа (Gwei: 124)';
             }, 3000);
-        });
+        };
 
-        // ===== INIT =====
         loadGame();
         recalcStats();
         renderHeader();
         renderShop();
 
-        // Event listeners
         document.getElementById('character').addEventListener('click', tap);
-        document.getElementById('character').addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            tap(e);
-        });
+        document.getElementById('character').addEventListener('touchstart', (e) => { e.preventDefault(); tap(e); });
 
-        // Passive income tick every 500ms
         setInterval(passiveTick, 500);
-
-        // Auto-save every 10 seconds
         setInterval(saveGame, 10000);
 
-        // Reset progress — hidden double-tap on logo
-        let resetCount = 0;
-        document.querySelector('.header-title').addEventListener('click', () => {
-            resetCount++;
-            if (resetCount >= 10) {
-                if (confirm('Сбросить весь прогресс?')) {
-                    localStorage.removeItem('moneyTycoonSave');
-                    location.reload();
-                }
-                resetCount = 0;
-            }
-            setTimeout(() => resetCount = 0, 3000);
-        });
+        let rc = 0;
+        document.querySelector('.header-title').onclick = () => {
+            rc++;
+            if (rc >= 10) { if (confirm('Сбросить весь прогресс?')) { localStorage.removeItem('moneyTycoonSave'); location.reload(); } rc = 0; }
+            setTimeout(() => rc = 0, 3000);
+        };
 
-        console.log('💰 Money Tycoon v1.0 загружена!');
-        console.log('💎 Фейковая донат-система активна. Никакие платежи не проходят.');
+        console.log('💰 Money Tycoon v1.0 loaded');
     </script>
 </body>
 </html>
