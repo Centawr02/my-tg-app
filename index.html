@@ -5,53 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>💰 Money Tycoon</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+        :root { --bg: #0a0a1a; --card: #14142a; --accent: #f5c518; --accent2: #ff6b35; --green: #00e676; --red: #ff1744; --text: #ffffff; --text2: #8888aa; --radius: 16px; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; position: relative; }
 
-        :root {
-            --bg: #0a0a1a;
-            --card: #14142a;
-            --accent: #f5c518;
-            --accent2: #ff6b35;
-            --green: #00e676;
-            --red: #ff1744;
-            --text: #ffffff;
-            --text2: #8888aa;
-            --radius: 16px;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            overflow-x: hidden;
-            position: relative;
-        }
-
-        .bg-particles {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
-        }
-        .bg-particles span {
-            position: absolute;
-            width: 6px; height: 6px;
-            background: var(--accent);
-            border-radius: 50%;
-            opacity: 0.15;
-            animation: floatBg 20s infinite linear;
-        }
+        .bg-particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
+        .bg-particles span { position: absolute; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; opacity: 0.15; animation: floatBg 20s infinite linear; }
         .bg-particles span:nth-child(1) { left: 10%; top: -10%; animation-duration: 18s; }
         .bg-particles span:nth-child(2) { left: 30%; top: -10%; animation-duration: 25s; width: 10px; height: 10px; }
         .bg-particles span:nth-child(3) { left: 50%; top: -10%; animation-duration: 22s; }
@@ -60,457 +20,111 @@
         .bg-particles span:nth-child(6) { left: 20%; top: -10%; animation-duration: 30s; width: 4px; height: 4px; }
         .bg-particles span:nth-child(7) { left: 60%; top: -10%; animation-duration: 19s; }
         .bg-particles span:nth-child(8) { left: 80%; top: -10%; animation-duration: 24s; width: 12px; height: 12px; }
+        @keyframes floatBg { 0% { transform: translateY(0) rotate(0deg); opacity: 0; } 10% { opacity: 0.15; } 90% { opacity: 0.15; } 100% { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
 
-        @keyframes floatBg {
-            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
-            10% { opacity: 0.15; }
-            90% { opacity: 0.15; }
-            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
-        }
-
-        .header {
-            position: relative;
-            z-index: 10;
-            padding: 12px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: linear-gradient(180deg, rgba(10,10,26,0.95) 0%, transparent 100%);
-        }
-        .header-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--accent);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-        .header-balance {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: var(--card);
-            padding: 6px 14px;
-            border-radius: 20px;
-            border: 1px solid rgba(245,197,24,0.2);
-        }
+        .header { position: relative; z-index: 10; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(180deg, rgba(10,10,26,0.95) 0%, transparent 100%); }
+        .header-title { font-size: 14px; font-weight: 700; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; }
+        .header-balance { display: flex; align-items: center; gap: 6px; background: var(--card); padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(245,197,24,0.2); }
         .header-balance .coin-icon { font-size: 18px; }
         .header-balance .amount { font-size: 16px; font-weight: 800; }
-        .level-badge {
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            color: #000;
-            font-size: 11px;
-            font-weight: 800;
-            padding: 3px 10px;
-            border-radius: 12px;
-        }
+        .level-badge { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #000; font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 12px; }
 
-        .main-screen {
-            position: relative;
-            z-index: 5;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 10px 20px 100px;
-        }
+        .main-screen { position: relative; z-index: 5; display: flex; flex-direction: column; align-items: center; padding: 10px 20px 100px; }
 
-        .stats-row {
-            display: flex;
-            gap: 12px;
-            margin-top: 6px;
-            width: 100%;
-            max-width: 360px;
-        }
-        .stat-card {
-            flex: 1;
-            background: var(--card);
-            border-radius: var(--radius);
-            padding: 10px 14px;
-            text-align: center;
-            border: 1px solid rgba(255,255,255,0.04);
-        }
+        .stats-row { display: flex; gap: 12px; margin-top: 6px; width: 100%; max-width: 360px; }
+        .stat-card { flex: 1; background: var(--card); border-radius: var(--radius); padding: 10px 14px; text-align: center; border: 1px solid rgba(255,255,255,0.04); }
         .stat-card .stat-icon { font-size: 18px; }
         .stat-card .stat-value { font-size: 14px; font-weight: 700; margin-top: 2px; }
         .stat-card .stat-label { font-size: 10px; color: var(--text2); margin-top: 1px; }
         .stat-card.per-second { border-color: rgba(0,230,118,0.15); }
 
-        .character-wrap {
-            position: relative;
-            margin: 12px 0 10px;
-            width: 200px;
-            height: 200px;
-        }
-        .character-glow {
-            position: absolute;
-            top: -20px; left: -20px;
-            width: 240px; height: 240px;
-            background: radial-gradient(circle, rgba(245,197,24,0.2) 0%, transparent 70%);
-            border-radius: 50%;
-            animation: pulseGlow 2s ease-in-out infinite;
-            pointer-events: none;
-        }
-        @keyframes pulseGlow {
-            0%, 100% { transform: scale(1); opacity: 0.6; }
-            50% { transform: scale(1.08); opacity: 1; }
-        }
-        #character {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            cursor: pointer;
-            border-radius: 50%;
-            transition: transform 0.08s ease;
-            z-index: 2;
-            -webkit-user-drag: none;
-        }
-        #character:active {
-            transform: scale(0.92);
-        }
-        #character.tap-anim {
-            animation: tapShrink 0.12s ease;
-        }
-        @keyframes tapShrink {
-            0% { transform: scale(1); }
-            40% { transform: scale(0.88); }
-            100% { transform: scale(1); }
-        }
+        .character-wrap { position: relative; margin: 12px 0 10px; width: 200px; height: 200px; }
+        .character-glow { position: absolute; top: -20px; left: -20px; width: 240px; height: 240px; background: radial-gradient(circle, rgba(245,197,24,0.2) 0%, transparent 70%); border-radius: 50%; animation: pulseGlow 2s ease-in-out infinite; pointer-events: none; }
+        @keyframes pulseGlow { 0%, 100% { transform: scale(1); opacity: 0.6; } 50% { transform: scale(1.08); opacity: 1; } }
+        #character { position: relative; width: 100%; height: 100%; object-fit: contain; cursor: pointer; border-radius: 50%; transition: transform 0.08s ease; z-index: 2; -webkit-user-drag: none; }
+        #character:active { transform: scale(0.92); }
+        #character.tap-anim { animation: tapShrink 0.12s ease; }
+        @keyframes tapShrink { 0% { transform: scale(1); } 40% { transform: scale(0.88); } 100% { transform: scale(1); } }
 
-        .float-coin {
-            position: fixed;
-            pointer-events: none;
-            font-size: 24px;
-            font-weight: 900;
-            color: var(--accent);
-            z-index: 100;
-            animation: floatUp 1s ease-out forwards;
-        }
-        @keyframes floatUp {
-            0% { opacity: 1; transform: translateY(0) scale(0.8); }
-            50% { opacity: 1; transform: translateY(-60px) scale(1.2); }
-            100% { opacity: 0; transform: translateY(-120px) scale(0.6); }
-        }
+        #musicBtn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: var(--text2); padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; margin-top: 4px; transition: all 0.2s; font-family: inherit; }
+        #musicBtn:hover { background: rgba(255,255,255,0.1); }
+        #musicBtn.active { color: var(--accent); border-color: var(--accent); }
 
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            z-index: 50;
-            background: rgba(10,10,26,0.97);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255,255,255,0.06);
-            display: flex;
-            justify-content: space-around;
-            padding: 6px 0 12px;
-            padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
-        }
-        .nav-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
-            background: none;
-            border: none;
-            color: var(--text2);
-            font-size: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            padding: 6px 14px;
-            border-radius: 12px;
-            transition: all 0.2s;
-            position: relative;
-        }
+        .float-coin { position: fixed; pointer-events: none; font-size: 24px; font-weight: 900; color: var(--accent); z-index: 100; animation: floatUp 1s ease-out forwards; }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(0.8); } 50% { opacity: 1; transform: translateY(-60px) scale(1.2); } 100% { opacity: 0; transform: translateY(-120px) scale(0.6); } }
+
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; z-index: 50; background: rgba(10,10,26,0.97); backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-around; padding: 6px 0 12px; padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
+        .nav-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; background: none; border: none; color: var(--text2); font-size: 10px; font-weight: 600; cursor: pointer; padding: 6px 14px; border-radius: 12px; transition: all 0.2s; position: relative; }
         .nav-btn .nav-icon { font-size: 22px; }
-        .nav-btn.active {
-            color: var(--accent);
-            background: rgba(245,197,24,0.1);
-        }
-        .nav-btn .badge {
-            position: absolute;
-            top: 2px;
-            right: 6px;
-            background: var(--red);
-            color: #fff;
-            font-size: 8px;
-            min-width: 16px;
-            height: 16px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-        }
+        .nav-btn.active { color: var(--accent); background: rgba(245,197,24,0.1); }
+        .nav-btn .badge { position: absolute; top: 2px; right: 6px; background: var(--red); color: #fff; font-size: 8px; min-width: 16px; height: 16px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; }
 
-        .panel {
-            display: none;
-            width: 100%;
-            max-width: 400px;
-            margin: 0 auto;
-            padding-bottom: 20px;
-        }
+        .panel { display: none; width: 100%; max-width: 400px; margin: 0 auto; padding-bottom: 20px; }
         .panel.active { display: block; }
-
-        .panel-title {
-            font-size: 18px;
-            font-weight: 800;
-            margin-bottom: 16px;
-            text-align: center;
-        }
+        .panel-title { font-size: 18px; font-weight: 800; margin-bottom: 16px; text-align: center; }
         .panel-title span { color: var(--accent); }
 
-        .shop-item {
-            background: var(--card);
-            border-radius: var(--radius);
-            padding: 14px 16px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border: 1px solid rgba(255,255,255,0.04);
-            transition: all 0.2s;
-        }
+        .shop-item { background: var(--card); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(255,255,255,0.04); transition: all 0.2s; }
         .shop-item:active { transform: scale(0.98); }
         .shop-item-left { display: flex; align-items: center; gap: 12px; }
-        .shop-item-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-        }
+        .shop-item-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
         .shop-item-icon.lv1 { background: rgba(245,197,24,0.15); }
         .shop-item-icon.lv2 { background: rgba(0,230,118,0.15); }
         .shop-item-icon.lv3 { background: rgba(255,107,53,0.15); }
         .shop-item-icon.lv4 { background: rgba(156,39,176,0.15); }
-
         .shop-item-info .shop-name { font-size: 14px; font-weight: 700; }
         .shop-item-info .shop-desc { font-size: 11px; color: var(--text2); margin-top: 2px; }
         .shop-item-info .shop-level { font-size: 11px; color: var(--accent); font-weight: 600; }
-
-        .shop-btn {
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            border: none;
-            color: #000;
-            font-weight: 800;
-            font-size: 12px;
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.2s;
-            white-space: nowrap;
-            min-width: 80px;
-            text-align: center;
-        }
+        .shop-btn { background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; color: #000; font-weight: 800; font-size: 12px; padding: 8px 16px; border-radius: 20px; cursor: pointer; transition: all 0.2s; white-space: nowrap; min-width: 80px; text-align: center; }
         .shop-btn:active { transform: scale(0.94); }
-        .shop-btn.maxed {
-            background: rgba(255,255,255,0.1);
-            color: var(--text2);
-        }
-        .shop-btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
+        .shop-btn.maxed { background: rgba(255,255,255,0.1); color: var(--text2); }
+        .shop-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        .premium-banner {
-            background: linear-gradient(135deg, rgba(255,107,53,0.1), rgba(156,39,176,0.1));
-            border: 1px solid rgba(255,107,53,0.2);
-            border-radius: var(--radius);
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 16px;
-        }
+        .premium-banner { background: linear-gradient(135deg, rgba(255,107,53,0.1), rgba(156,39,176,0.1)); border: 1px solid rgba(255,107,53,0.2); border-radius: var(--radius); padding: 20px; text-align: center; margin-bottom: 16px; }
         .premium-banner h2 { font-size: 22px; margin-bottom: 4px; }
         .premium-banner h2 span { background: linear-gradient(135deg, var(--accent), var(--accent2), #9c27b0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .premium-banner p { color: var(--text2); font-size: 13px; }
-        .premium-banner .price-tag {
-            display: inline-block;
-            margin-top: 10px;
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            color: #000;
-            font-weight: 800;
-            font-size: 20px;
-            padding: 6px 24px;
-            border-radius: 16px;
-        }
+        .premium-banner .price-tag { display: inline-block; margin-top: 10px; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #000; font-weight: 800; font-size: 20px; padding: 6px 24px; border-radius: 16px; }
 
-        .donate-card {
-            background: var(--card);
-            border-radius: var(--radius);
-            padding: 16px;
-            margin-bottom: 12px;
-            border: 1px solid rgba(255,255,255,0.04);
-        }
-        .donate-card h3 {
-            font-size: 14px;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
+        .donate-card { background: var(--card); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.04); }
+        .donate-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
         .donate-card h3 .emoji { margin-right: 6px; }
-
-        .donate-input {
-            width: 100%;
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 10px;
-            padding: 12px 14px;
-            color: #fff;
-            font-size: 14px;
-            margin-bottom: 8px;
-            outline: none;
-            transition: border 0.2s;
-            font-family: inherit;
-        }
+        .donate-input { width: 100%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px 14px; color: #fff; font-size: 14px; margin-bottom: 8px; outline: none; transition: border 0.2s; font-family: inherit; }
         .donate-input:focus { border-color: var(--accent); }
         .donate-input::placeholder { color: rgba(255,255,255,0.25); }
-
-        .donate-row {
-            display: flex;
-            gap: 8px;
-        }
+        .donate-row { display: flex; gap: 8px; }
         .donate-row .donate-input { flex: 1; }
-
-        .crypto-options {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin: 8px 0;
-        }
-        .crypto-btn {
-            flex: 1;
-            min-width: 70px;
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 10px;
-            padding: 10px 8px;
-            color: var(--text2);
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-        }
+        .crypto-options { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+        .crypto-btn { flex: 1; min-width: 70px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px 8px; color: var(--text2); font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-align: center; }
         .crypto-btn .crypto-icon { font-size: 20px; display: block; margin-bottom: 2px; }
-        .crypto-btn.selected {
-            border-color: var(--accent);
-            color: var(--accent);
-            background: rgba(245,197,24,0.1);
-        }
+        .crypto-btn.selected { border-color: var(--accent); color: var(--accent); background: rgba(245,197,24,0.1); }
         .crypto-btn:active { transform: scale(0.95); }
-
-        .donate-submit {
-            width: 100%;
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            border: none;
-            color: #000;
-            font-weight: 800;
-            font-size: 15px;
-            padding: 14px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            margin-top: 6px;
-        }
+        .donate-submit { width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; color: #000; font-weight: 800; font-size: 15px; padding: 14px; border-radius: 12px; cursor: pointer; transition: all 0.2s; margin-top: 6px; }
         .donate-submit:active { transform: scale(0.97); }
-        .donate-submit.processing {
-            background: linear-gradient(90deg, var(--accent), #9c27b0, var(--accent));
-            background-size: 200%;
-            animation: shimmer 1.2s linear infinite;
-        }
-        @keyframes shimmer {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 200% 50%; }
-        }
-
-        .donate-result {
-            text-align: center;
-            padding: 14px;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 14px;
-            display: none;
-            margin-top: 8px;
-        }
-        .donate-result.error {
-            display: block;
-            background: rgba(255,23,68,0.15);
-            color: var(--red);
-            border: 1px solid rgba(255,23,68,0.2);
-        }
-        .donate-result.success {
-            display: block;
-            background: rgba(0,230,118,0.15);
-            color: var(--green);
-            border: 1px solid rgba(0,230,118,0.2);
-        }
-
-        .premium-perks {
-            margin-top: 12px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-        .perk {
-            background: rgba(255,255,255,0.04);
-            border-radius: 10px;
-            padding: 10px;
-            text-align: center;
-        }
+        .donate-submit.processing { background: linear-gradient(90deg, var(--accent), #9c27b0, var(--accent)); background-size: 200%; animation: shimmer 1.2s linear infinite; }
+        @keyframes shimmer { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+        .donate-result { text-align: center; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 14px; display: none; margin-top: 8px; }
+        .donate-result.error { display: block; background: rgba(255,23,68,0.15); color: var(--red); border: 1px solid rgba(255,23,68,0.2); }
+        .donate-result.success { display: block; background: rgba(0,230,118,0.15); color: var(--green); border: 1px solid rgba(0,230,118,0.2); }
+        .premium-perks { margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .perk { background: rgba(255,255,255,0.04); border-radius: 10px; padding: 10px; text-align: center; }
         .perk .perk-icon { font-size: 20px; }
         .perk .perk-text { font-size: 11px; color: var(--text2); margin-top: 2px; }
 
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(4px);
-            z-index: 200;
-            display: none;
-            align-items: center;
-            justify-content: center;
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 200; display: none; align-items: center; justify-content: center; }
         .modal-overlay.show { display: flex; }
-
-        .modal-content {
-            background: var(--card);
-            border-radius: 20px;
-            padding: 24px 20px;
-            width: 90%;
-            max-width: 340px;
-            text-align: center;
-            border: 1px solid rgba(255,255,255,0.06);
-            animation: modalIn 0.25s ease;
-        }
-        @keyframes modalIn {
-            0% { transform: scale(0.9); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
+        .modal-content { background: var(--card); border-radius: 20px; padding: 24px 20px; width: 90%; max-width: 340px; text-align: center; border: 1px solid rgba(255,255,255,0.06); animation: modalIn 0.25s ease; }
+        @keyframes modalIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         .modal-content .modal-icon { font-size: 48px; margin-bottom: 8px; }
         .modal-content h3 { font-size: 18px; margin-bottom: 4px; }
         .modal-content p { color: var(--text2); font-size: 13px; margin-bottom: 16px; }
-        .modal-btn {
-            background: var(--accent);
-            border: none;
-            color: #000;
-            font-weight: 800;
-            padding: 10px 28px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 14px;
-        }
+        .modal-btn { background: var(--accent); border: none; color: #000; font-weight: 800; padding: 10px 28px; border-radius: 20px; cursor: pointer; font-size: 14px; }
         .modal-btn:active { transform: scale(0.95); }
 
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
-
-        @media (max-width: 380px) {
-            .character-wrap { width: 160px; height: 160px; }
-            .character-glow { width: 200px; height: 200px; top: -20px; left: -20px; }
-        }
+        @media (max-width: 380px) { .character-wrap { width: 160px; height: 160px; } .character-glow { width: 200px; height: 200px; top: -20px; left: -20px; } }
     </style>
 </head>
 <body>
@@ -519,6 +133,18 @@
         <span></span><span></span><span></span>
         <span></span><span></span>
     </div>
+
+    <!-- ===== AUDIO ===== -->
+    <audio id="bgMusic" loop preload="auto">
+        <!-- ⚠️ ЗАМЕНИТЕ ССЫЛКУ НА СВОЮ mp3 -->
+        <source src="YOUR_MP3_URL_HERE" type="audio/mp3">
+    </audio>
+    <audio id="tapSound" preload="auto">
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" type="audio/mp3">
+    </audio>
+    <audio id="buySound" preload="auto">
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" type="audio/mp3">
+    </audio>
 
     <div class="header">
         <div class="header-title">💰 Money Tycoon</div>
@@ -553,6 +179,8 @@
             <img id="character" src="https://i.ibb.co/gbPQNt9w/7-UJ8-Yc-f-ZK89-Hu1-XLaj-SWODNp-ZDIXc1-Xqylde4-HAW2-AWM0-OYpi-ZWSh-UVh1-nwv-N04-F3-Qsu-DMSC0qt-N4-H9-KF4f-Y.jpg" alt="Персонаж" draggable="false">
         </div>
 
+        <button id="musicBtn">🔇 Музыка</button>
+
         <div class="panel active" id="panelMain">
             <div class="panel-title">🏪 <span>Магазин</span></div>
             <div id="shopList"></div>
@@ -565,7 +193,6 @@
                 <p>Доход x2, уникальный скин, эксклюзивные бонусы</p>
                 <div class="price-tag">$9.99 / мес</div>
             </div>
-
             <div class="donate-card">
                 <h3><span class="emoji">💳</span>Оплата картой</h3>
                 <input class="donate-input" id="cardName" placeholder="Имя на карте" value="IVAN IVANOV">
@@ -577,28 +204,18 @@
                 <button class="donate-submit" id="cardPayBtn">💳 Оплатить $9.99</button>
                 <div class="donate-result" id="cardResult"></div>
             </div>
-
             <div class="donate-card">
                 <h3><span class="emoji">₿</span>Оплата криптой</h3>
                 <div class="crypto-options" id="cryptoOptions">
-                    <div class="crypto-btn selected" data-coin="btc">
-                        <span class="crypto-icon">₿</span> Bitcoin
-                    </div>
-                    <div class="crypto-btn" data-coin="eth">
-                        <span class="crypto-icon">⟠</span> Ethereum
-                    </div>
-                    <div class="crypto-btn" data-coin="ton">
-                        <span class="crypto-icon">💎</span> TON
-                    </div>
-                    <div class="crypto-btn" data-coin="usdt">
-                        <span class="crypto-icon">₮</span> USDT
-                    </div>
+                    <div class="crypto-btn selected" data-coin="btc"><span class="crypto-icon">₿</span>Bitcoin</div>
+                    <div class="crypto-btn" data-coin="eth"><span class="crypto-icon">⟠</span>Ethereum</div>
+                    <div class="crypto-btn" data-coin="ton"><span class="crypto-icon">💎</span>TON</div>
+                    <div class="crypto-btn" data-coin="usdt"><span class="crypto-icon">₮</span>USDT</div>
                 </div>
                 <input class="donate-input" id="cryptoAddress" placeholder="Адрес кошелька" value="0x742d35Cc6634C0532925a3b844Bc9e7595f2bD18">
                 <button class="donate-submit" id="cryptoPayBtn">₿ Оплатить $9.99 в BTC</button>
                 <div class="donate-result" id="cryptoResult"></div>
             </div>
-
             <div class="premium-perks">
                 <div class="perk"><div class="perk-icon">⚡</div><div class="perk-text">Доход x2</div></div>
                 <div class="perk"><div class="perk-icon">🖼️</div><div class="perk-text">Уникальный скин</div></div>
@@ -611,13 +228,8 @@
     </div>
 
     <div class="bottom-nav">
-        <button class="nav-btn active" data-panel="panelMain">
-            <span class="nav-icon">🏪</span> Магазин
-        </button>
-        <button class="nav-btn" data-panel="panelPremium">
-            <span class="nav-icon">💎</span> Премиум
-            <span class="badge">🔥</span>
-        </button>
+        <button class="nav-btn active" data-panel="panelMain"><span class="nav-icon">🏪</span> Магазин</button>
+        <button class="nav-btn" data-panel="panelPremium"><span class="nav-icon">💎</span> Премиум<span class="badge">🔥</span></button>
     </div>
 
     <div class="modal-overlay" id="modalOverlay">
@@ -630,16 +242,7 @@
     </div>
 
     <script>
-        const game = {
-            coins: 0,
-            totalTaps: 0,
-            tapPower: 1,
-            earnPerSec: 0,
-            level: 1,
-            upgradeLevels: { tap: 0, income: 0, crit: 0, auto: 0, multi: 0 },
-            premium: false
-        };
-
+        const game = { coins: 0, totalTaps: 0, tapPower: 1, earnPerSec: 0, level: 1, upgradeLevels: { tap: 0, income: 0, crit: 0, auto: 0, multi: 0 }, premium: false };
         const upgrades = [
             { id: 'tap', name: '👆 Сила тапа', desc: 'Больше монет за каждый тап', icon: '💪', iconClass: 'lv1', baseCost: 10, costMult: 1.5, maxLevel: 20, effect: (l) => `+${l+1} за тап`, apply: (l) => { game.tapPower = 1 + l; } },
             { id: 'income', name: '⚡ Пассивный доход', desc: 'Монеты капают сами', icon: '📈', iconClass: 'lv2', baseCost: 50, costMult: 1.6, maxLevel: 25, effect: (l) => `+${l+1}/сек`, apply: (l) => { game.earnPerSec = (game.upgradeLevels.auto > 0 ? (l+1)*2 : l+1); } },
@@ -650,28 +253,12 @@
 
         function saveGame() { try { localStorage.setItem('moneyTycoonSave', JSON.stringify(game)); } catch(e) {} }
         function loadGame() { try { const d = localStorage.getItem('moneyTycoonSave'); if (d) Object.assign(game, JSON.parse(d)); } catch(e) {} }
-
-        function getCost(id) {
-            const u = upgrades.find(x => x.id === id);
-            if (!u) return 999999;
-            return Math.floor(u.baseCost * Math.pow(u.costMult, game.upgradeLevels[id] || 0));
-        }
-
-        function formatNum(n) {
-            if (n >= 1e9) return (n/1e9).toFixed(1)+'B';
-            if (n >= 1e6) return (n/1e6).toFixed(1)+'M';
-            if (n >= 1e3) return (n/1e3).toFixed(1)+'K';
-            return Math.floor(n).toString();
-        }
+        function getCost(id) { const u = upgrades.find(x => x.id === id); if (!u) return 999999; return Math.floor(u.baseCost * Math.pow(u.costMult, game.upgradeLevels[id] || 0)); }
+        function formatNum(n) { if (n >= 1e9) return (n/1e9).toFixed(1)+'B'; if (n >= 1e6) return (n/1e6).toFixed(1)+'M'; if (n >= 1e3) return (n/1e3).toFixed(1)+'K'; return Math.floor(n).toString(); }
 
         function recalcStats() {
-            const l = game.upgradeLevels;
-            game.tapPower = 1 + l.tap;
-            let base = (l.income + 1) + (l.auto || 0);
-            if (l.multi > 0) base *= (l.multi + 1);
-            game.earnPerSec = base;
-            const tot = l.tap + l.income + l.crit + l.auto + l.multi;
-            game.level = Math.min(30, Math.floor(tot / 3) + 1);
+            const l = game.upgradeLevels; game.tapPower = 1 + l.tap; let base = (l.income + 1) + (l.auto || 0); if (l.multi > 0) base *= (l.multi + 1); game.earnPerSec = base;
+            const tot = l.tap + l.income + l.crit + l.auto + l.multi; game.level = Math.min(30, Math.floor(tot / 3) + 1);
         }
 
         function renderHeader() {
@@ -683,154 +270,94 @@
         }
 
         function renderShop() {
-            const c = document.getElementById('shopList');
-            c.innerHTML = '';
+            const c = document.getElementById('shopList'); c.innerHTML = '';
             upgrades.forEach(u => {
-                const lvl = game.upgradeLevels[u.id] || 0;
-                const maxed = lvl >= u.maxLevel;
-                const cost = getCost(u.id);
-                const canBuy = game.coins >= cost && !maxed;
-                const el = document.createElement('div');
-                el.className = 'shop-item';
-                el.innerHTML = `
-                    <div class="shop-item-left">
-                        <div class="shop-item-icon ${u.iconClass}">${u.icon}</div>
-                        <div class="shop-item-info">
-                            <div class="shop-name">${u.name}</div>
-                            <div class="shop-desc">${u.desc}</div>
-                            <div class="shop-level">${maxed ? 'MAX' : 'Ур. ' + lvl + ' → ' + u.effect(lvl)}</div>
-                        </div>
-                    </div>
-                    <button class="shop-btn ${maxed ? 'maxed' : ''}" data-id="${u.id}" ${!canBuy || maxed ? 'disabled' : ''}>
-                        ${maxed ? 'MAX ✅' : '💰 ' + formatNum(cost)}
-                    </button>`;
-                c.appendChild(el);
-                el.querySelector('.shop-btn').onclick = () => buyUpgrade(u.id);
+                const lvl = game.upgradeLevels[u.id] || 0, maxed = lvl >= u.maxLevel, cost = getCost(u.id), canBuy = game.coins >= cost && !maxed;
+                const el = document.createElement('div'); el.className = 'shop-item';
+                el.innerHTML = `<div class="shop-item-left"><div class="shop-item-icon ${u.iconClass}">${u.icon}</div><div class="shop-item-info"><div class="shop-name">${u.name}</div><div class="shop-desc">${u.desc}</div><div class="shop-level">${maxed ? 'MAX' : 'Ур. ' + lvl + ' → ' + u.effect(lvl)}</div></div></div><button class="shop-btn ${maxed ? 'maxed' : ''}" data-id="${u.id}" ${!canBuy || maxed ? 'disabled' : ''}>${maxed ? 'MAX ✅' : '💰 ' + formatNum(cost)}</button>`;
+                c.appendChild(el); el.querySelector('.shop-btn').onclick = () => buyUpgrade(u.id);
             });
         }
 
         function buyUpgrade(id) {
-            const u = upgrades.find(x => x.id === id);
-            if (!u) return;
-            const lvl = game.upgradeLevels[id] || 0;
-            if (lvl >= u.maxLevel) return;
-            const cost = getCost(id);
-            if (game.coins < cost) return;
-            game.coins -= cost;
-            game.upgradeLevels[id] = lvl + 1;
-            recalcStats();
-            u.apply(game.upgradeLevels[id]);
-            saveGame();
-            renderHeader();
-            renderShop();
+            const u = upgrades.find(x => x.id === id); if (!u) return;
+            const lvl = game.upgradeLevels[id] || 0; if (lvl >= u.maxLevel) return;
+            const cost = getCost(id); if (game.coins < cost) return;
+            game.coins -= cost; game.upgradeLevels[id] = lvl + 1; recalcStats(); u.apply(game.upgradeLevels[id]);
+            saveGame(); renderHeader(); renderShop();
             showModal('🎉', 'Апгрейд!', u.name + ' → ' + u.effect(game.upgradeLevels[id]));
+            // Sound
+            const bs = document.getElementById('buySound'); if (bs) { bs.currentTime = 0; bs.play().catch(() => {}); }
         }
 
         let tapTimeout;
         function tap(e) {
-            const char = document.getElementById('character');
-            char.classList.remove('tap-anim');
-            void char.offsetWidth;
-            char.classList.add('tap-anim');
+            const char = document.getElementById('character'); char.classList.remove('tap-anim'); void char.offsetWidth; char.classList.add('tap-anim');
             let earned = game.tapPower;
             const cl = game.upgradeLevels.crit || 0;
-            if (cl > 0 && Math.random() * 100 < Math.min(5 + cl * 3, 50)) { earned *= 3; }
+            if (cl > 0 && Math.random() * 100 < Math.min(5 + cl * 3, 50)) earned *= 3;
             if (game.premium) earned *= 2;
-            game.coins += earned;
-            game.totalTaps += 1;
-            const el = document.createElement('div');
-            el.className = 'float-coin';
-            el.textContent = '+' + Math.floor(earned);
-            el.style.left = (40 + Math.random() * 20) + '%';
-            el.style.top = (35 + Math.random() * 15) + '%';
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 1000);
-            renderHeader();
-            clearTimeout(tapTimeout);
-            tapTimeout = setTimeout(saveGame, 500);
+            game.coins += earned; game.totalTaps += 1;
+            const el = document.createElement('div'); el.className = 'float-coin'; el.textContent = '+' + Math.floor(earned);
+            el.style.left = (40 + Math.random() * 20) + '%'; el.style.top = (35 + Math.random() * 15) + '%';
+            document.body.appendChild(el); setTimeout(() => el.remove(), 1000);
+            renderHeader(); clearTimeout(tapTimeout); tapTimeout = setTimeout(saveGame, 500);
+            // Sound
+            const ts = document.getElementById('tapSound'); if (ts) { ts.currentTime = 0; ts.play().catch(() => {}); }
         }
 
-        function passiveTick() {
-            if (game.earnPerSec > 0) {
-                game.coins += Math.max(1, Math.floor(game.earnPerSec / 2));
-                renderHeader();
-                saveGame();
-            }
-        }
+        function passiveTick() { if (game.earnPerSec > 0) { game.coins += Math.max(1, Math.floor(game.earnPerSec / 2)); renderHeader(); } }
 
         function showModal(icon, title, text) {
-            document.getElementById('modalIcon').textContent = icon;
-            document.getElementById('modalTitle').textContent = title;
-            document.getElementById('modalText').textContent = text;
-            document.getElementById('modalOverlay').classList.add('show');
+            document.getElementById('modalIcon').textContent = icon; document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalText').textContent = text; document.getElementById('modalOverlay').classList.add('show');
         }
-
         document.getElementById('modalBtn').onclick = () => document.getElementById('modalOverlay').classList.remove('show');
         document.getElementById('modalOverlay').onclick = (e) => { if (e.target === e.currentTarget) document.getElementById('modalOverlay').classList.remove('show'); };
 
-        document.querySelectorAll('.nav-btn').forEach(b => {
-            b.onclick = () => {
-                document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active'));
-                document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
-                b.classList.add('active');
-                document.getElementById(b.dataset.panel).classList.add('active');
-            };
-        });
+        document.querySelectorAll('.nav-btn').forEach(b => { b.onclick = () => { document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active')); document.querySelectorAll('.panel').forEach(x => x.classList.remove('active')); b.classList.add('active'); document.getElementById(b.dataset.panel).classList.add('active'); }; });
 
         document.getElementById('cardPayBtn').onclick = function() {
             const r = document.getElementById('cardResult');
-            if (!document.getElementById('cardName').value.trim() || !document.getElementById('cardNumber').value.trim() || !document.getElementById('cardExp').value.trim() || !document.getElementById('cardCvv').value.trim()) {
-                r.className = 'donate-result error'; r.textContent = '❌ Заполните все поля!'; return;
-            }
+            if (!document.getElementById('cardName').value.trim() || !document.getElementById('cardNumber').value.trim() || !document.getElementById('cardExp').value.trim() || !document.getElementById('cardCvv').value.trim()) { r.className = 'donate-result error'; r.textContent = '❌ Заполните все поля!'; return; }
             this.textContent = '⏳ Обработка...'; this.classList.add('processing'); this.disabled = true; r.className = 'donate-result'; r.textContent = '';
-            setTimeout(() => {
-                this.textContent = '💳 Оплатить $9.99'; this.classList.remove('processing'); this.disabled = false;
-                r.className = 'donate-result error'; r.textContent = '❌ Ошибка! Банк отклонил транзакцию (код: ERR-9724)';
-            }, 2500);
+            setTimeout(() => { this.textContent = '💳 Оплатить $9.99'; this.classList.remove('processing'); this.disabled = false; r.className = 'donate-result error'; r.textContent = '❌ Ошибка! Банк отклонил транзакцию (код: ERR-9724)'; }, 2500);
         };
-
-        document.querySelectorAll('.crypto-btn').forEach(b => {
-            b.onclick = function() {
-                document.querySelectorAll('.crypto-btn').forEach(x => x.classList.remove('selected'));
-                this.classList.add('selected');
-                const names = { btc: 'BTC', eth: 'ETH', ton: 'TON', usdt: 'USDT' };
-                document.getElementById('cryptoPayBtn').textContent = '₿ Оплатить $9.99 в ' + (names[this.dataset.coin] || this.dataset.coin);
-            };
-        });
-
+        document.querySelectorAll('.crypto-btn').forEach(b => { b.onclick = function() { document.querySelectorAll('.crypto-btn').forEach(x => x.classList.remove('selected')); this.classList.add('selected'); const names = { btc: 'BTC', eth: 'ETH', ton: 'TON', usdt: 'USDT' }; document.getElementById('cryptoPayBtn').textContent = '₿ Оплатить $9.99 в ' + (names[this.dataset.coin] || this.dataset.coin); }; });
         document.getElementById('cryptoPayBtn').onclick = function() {
-            const r = document.getElementById('cryptoResult');
-            const selected = document.querySelector('.crypto-btn.selected');
-            const cn = selected ? selected.textContent.trim().split('\n')[1] : 'BTC';
-            if (!document.getElementById('cryptoAddress').value.trim()) {
-                r.className = 'donate-result error'; r.textContent = '❌ Введите адрес кошелька!'; return;
-            }
+            const r = document.getElementById('cryptoResult'); const selected = document.querySelector('.crypto-btn.selected'); const cn = selected ? selected.textContent.trim().split('\n')[1] : 'BTC';
+            if (!document.getElementById('cryptoAddress').value.trim()) { r.className = 'donate-result error'; r.textContent = '❌ Введите адрес кошелька!'; return; }
             this.textContent = '⏳ Подтверждение...'; this.classList.add('processing'); this.disabled = true; r.className = 'donate-result'; r.textContent = '';
-            setTimeout(() => {
-                this.textContent = '₿ Оплатить $9.99'; this.classList.remove('processing'); this.disabled = false;
-                r.className = 'donate-result error'; r.textContent = '❌ Ошибка сети! Недостаточно газа (Gwei: 124)';
-            }, 3000);
+            setTimeout(() => { this.textContent = '₿ Оплатить $9.99'; this.classList.remove('processing'); this.disabled = false; r.className = 'donate-result error'; r.textContent = '❌ Ошибка сети! Недостаточно газа (Gwei: 124)'; }, 3000);
         };
 
-        loadGame();
-        recalcStats();
-        renderHeader();
-        renderShop();
+        // ===== MUSIC SYSTEM =====
+        const bgMusic = document.getElementById('bgMusic');
+        const musicBtn = document.getElementById('musicBtn');
+        let musicOn = false;
+        bgMusic.volume = 0.3;
 
+        musicBtn.onclick = function() {
+            if (musicOn) {
+                bgMusic.pause();
+                musicBtn.textContent = '🔇 Музыка';
+                musicBtn.classList.remove('active');
+            } else {
+                bgMusic.play().catch(() => {});
+                musicBtn.textContent = '🔊 Музыка';
+                musicBtn.classList.add('active');
+            }
+            musicOn = !musicOn;
+        };
+
+        loadGame(); recalcStats(); renderHeader(); renderShop();
         document.getElementById('character').addEventListener('click', tap);
         document.getElementById('character').addEventListener('touchstart', (e) => { e.preventDefault(); tap(e); });
-
-        setInterval(passiveTick, 500);
-        setInterval(saveGame, 10000);
+        setInterval(passiveTick, 500); setInterval(saveGame, 10000);
 
         let rc = 0;
-        document.querySelector('.header-title').onclick = () => {
-            rc++;
-            if (rc >= 10) { if (confirm('Сбросить весь прогресс?')) { localStorage.removeItem('moneyTycoonSave'); location.reload(); } rc = 0; }
-            setTimeout(() => rc = 0, 3000);
-        };
-
-        console.log('💰 Money Tycoon v1.0 loaded');
+        document.querySelector('.header-title').onclick = () => { rc++; if (rc >= 10) { if (confirm('Сбросить весь прогресс?')) { localStorage.removeItem('moneyTycoonSave'); location.reload(); } rc = 0; } setTimeout(() => rc = 0, 3000); };
+        console.log('💰 Money Tycoon v1.1 — with music!');
     </script>
 </body>
 </html>
